@@ -1,0 +1,16 @@
+{
+  "name": "smart-router",
+  "version": "0.0.1",
+  "author": "Callixte <ccauchois@virtuoz.com>",
+  "description": "an application routing messages/events between the different parts of our platform",
+  "main": "./lib/index",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:VirtuOz/smart-router.git"
+  },
+  "dependencies" : {
+  },
+  "engines": {
+    "node": ">=0.6"
+  }
+}

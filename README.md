@@ -18,8 +18,8 @@ Each Actor is assigned a Queue.
 There is one Exchanger per Agent, one for the end users per Agent and one per LiveChat provider.
 
 One an Actor connects, its type is determine by the URL it uses: eg. WBH 
-of Agent 456 opens a socket to ws://smartrouter.virtuoz.com/agent/456, 
-the UI for agent 456 will connect to ws://smartrouter.virtuoz.com/ui/456.
+of Agent 456 opens a socket to `ws://smartrouter.virtuoz.com/agent/456`, 
+the UI for agent 456 will connect to `ws://smartrouter.virtuoz.com/ui/456`.
 
 Upon connection the socket is bound to the corresponding queue: (pseudo js)
 

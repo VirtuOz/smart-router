@@ -1,0 +1,12 @@
+.idea/workspace.xml
+.idea/libraries
+
+target
+*.tar
+
+# Don't include node modules ever.
+node_modules
+
+.DS_Store
+
+xunit.xml
