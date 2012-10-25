@@ -58,6 +58,7 @@ messages instead of a big one.
 
 
 To start the prototype:
+
 	$ node lib/index.js &
 	$ node mockactor/wbh.js &
 
