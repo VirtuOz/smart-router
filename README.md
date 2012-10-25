@@ -55,3 +55,9 @@ to the right exchanger.
 A message/event will have a type some metadata (at least some session ids) 
 and a payload. The payload has to be small, we will prefer to send several 
 messages instead of a big one.
+
+
+To start the prototype:
+	$ node lib/index.js &
+	$ node mockactor/wbh.js &
+
