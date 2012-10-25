@@ -9,18 +9,22 @@
  */
  
 var io = require('socket.io-client').connect('http://localhost:8080/agent/456');
+var actorid = 'agent/456/10.50.61.103';
 
 io.on('connect', function () {
 	console.log('connected');
-  io.on('hello', function (data) {
-    console.log('handshaked ' + data);
+  io.on('hello', function () {
+    console.log('handshaked');
   });
   io.on('whoareyou', function (data) {
-    console.log('got whoareyou ' + data);
-    io.emit('iam', 'agent456-10.50.61.103');
+    console.log('got whoareyou');
+    io.emit('iam', actorid);
     if (data) {
       io.emit(data.type, data.message);
     }
+  });
+  io.on('echo', function (data) {
+    console.log('got echo: ' + JSON.stringify(data));
   });
 });
 io.on('connection_failed', function (err) {
@@ -30,4 +34,4 @@ io.on('error', function (err) {
   console.log('error '+ err);
 });
 
-setInterval(function () { io.emit('iam', 'agent456-10.50.61.103'); }, 1000);
+setInterval(function () { io.emit('echo', { from: actorid, payload: 'quack!!' }); }, 1000);
