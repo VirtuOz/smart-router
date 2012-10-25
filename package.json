@@ -9,6 +9,9 @@
     "url": "git+ssh://git@github.com:VirtuOz/smart-router.git"
   },
   "dependencies" : {
+    "jsclass":"3.0.9",
+    "amqp":"0.1.3",
+    "socket.io":"0.9"
   },
   "engines": {
     "node": ">=0.6"
