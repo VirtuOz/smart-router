@@ -8,7 +8,7 @@ exports.local =
   ],
   routes: [
 	{ endpoint: 'agent', message: 'talk',
-	  action: function () {}
+	  action: function (data, smartrouter) {}
     }
   ]
 }
