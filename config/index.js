@@ -5,7 +5,7 @@ exports.local =
   endpoints: [ 
     { name: 'agent', ids: [ 456 ] },
     { name: 'ui', ids: [ 456 ] }
-  ]
+  ],
   routes: [
 	{ endpoint: 'agent', message: 'talk',
 	  action: function () {}
