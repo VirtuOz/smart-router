@@ -1,18 +1,27 @@
+/*
+ * Copyright 2012 VirtuOz Inc.  All rights reserved.
+ */
+
+/**
+ *
+ * @author ccauchois
+ * @created 2012-10-24
+ */
+
+var QUEUEFLAG = require('../lib/const').QUEUEFLAG;
+
 exports.local = 
 {
   port: 8080,
   amqp: { url: 'amqp://10.50.61.102'},
   endpoints: [ 
-    { name: 'agent', ids: [ 456 ] },
+    { name: 'agent', ids: [ 456 ], queue: QUEUEFLAG.actor | QUEUEFLAG.endpoint },
     { name: 'ui', ids: [ 456 ] }
   ],
   routes: [
-    { endpoint: 'agent', messagetype: 'echo',
+    { endpoint: '*', messagetype: 'echo',
       action: function (message, socket, smartrouter) {
-        var qmsg = {};
-        qmsg.type = 'echo';
-        qmsg.data = message;
-        smartrouter.amqp.exchange(socket.name, { passive: true}).publish(message.from, qmsg, { contentType: 'application/json' });
+        smartrouter.publish(socket.name, message.from, 'echo', message);
       }
     }
   ]

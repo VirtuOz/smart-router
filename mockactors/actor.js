@@ -41,6 +41,7 @@ module.exports = new JS.Class({
     self.socket.on('error', function (err) {
       self.log('error '+ err);
     });
+    return self.socket;
   },
   log: function (msg) {
     console.log(this.actorid + ': ' + msg);
