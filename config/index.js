@@ -21,9 +21,20 @@ exports.local =
   routes: [
     { endpoint: '*', messagetype: 'echo',
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(socket.name, message.from, 'echo', message);
+        smartrouter.publish(socket.name, message.ids.default, 'echo', message);
+      }
+    },
+    { endpoint: 'ui', messagetype: 'talk',
+      action: function (message, socket, smartrouter) {
+        smartrouter.publish(socket.name, message.ids.agent, 'talk', message);
+      }
+    },
+    { endpoint: 'agent', messagetype: 'talkback',
+      action: function (message, socket, smartrouter) {
+        smartrouter.publish(socket.name, message.ids.ui, 'talkback', message);
       }
     }
+
   ]
 }
 

@@ -17,7 +17,7 @@ module.exports = new JS.Class({
     this.socket = io.connect('http://' + server + '/' + endpoint);
     this.actorid = endpoint + '/' + id;
   },
-  setup: function () {
+  setup: function (localsetup) {
     var self = this;
     self.socket.on('connect', function () {
       self.log('connected');
@@ -34,6 +34,10 @@ module.exports = new JS.Class({
       self.socket.on('echo', function (data) {
         self.log('got echo: ' + JSON.stringify(data));
       });
+      if (localsetup) {
+        self.log('localsetup');
+        localsetup(self);
+      }
     });
     self.socket.on('connection_failed', function (err) {
       self.log('connection failed '+ err);
@@ -47,6 +51,6 @@ module.exports = new JS.Class({
     console.log(this.actorid + ': ' + msg);
   },
   echo: function () {
-    this.socket.emit('echo', { from: this.actorid, payload: 'quack!!' });
+    this.socket.emit('echo', { ids: { default: this.actorid}, metadata: {}, payload: 'quack!!' });
   }
 });
