@@ -16,10 +16,11 @@ module.exports = new JS.Class({
   initialize: function (server, endpoint, id) {
     this.socket = io.connect('http://' + server + '/' + endpoint);
     this.actorid = endpoint + '/' + id;
+    this.endpoint = endpoint;
   },
   setup: function (localsetup) {
     var self = this;
-    self.socket.on('connect', function () {
+    self.socket.once('connect', function () {
       self.log('connected');
       self.socket.on('hello', function () {
         self.log('handshaked');

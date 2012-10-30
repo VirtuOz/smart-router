@@ -15,7 +15,8 @@ var Actor = require('./actor');
 var Agent = new JS.Class(Actor, {
   initialize: function (server, endpoint, id) {
     this.callSuper(server, endpoint, id);
-    this.UI = 'agent/456';
+    this.UI = 'ui/456';
+    this.livechat = 'livechat/456';
   },
   setup: function () {
     this.callSuper(this.localsetup);
@@ -23,9 +24,20 @@ var Agent = new JS.Class(Actor, {
   localsetup: function (self) {
     self.log('registering talk');
     self.socket.on('talk', function (data) {
-      self.log(data.ids.ui + ' said ' + data.payload.text);
       self.UI = data.ids.ui;
-      self.talk('hello again');
+      self.log(data.ids.ui + ' said ' + data.payload.text);
+      if (data.payload.text === 'livechat') {
+        var msg = { ids: { ui: self.UI, agent: self.actorid, livechat: self.livechat }, metadata: { livechat: false }, 
+          payload: { text: 'transferring to livechat' }};
+        self.socket.emit('talkback', msg);
+        msg.payload.text = 'requesting session';
+        self.socket.emit('sessionrequest', msg);
+      } else {
+        self.talk('hello again');
+      }
+    });
+    self.socket.on('log', function (data) {
+      console.log('logging ' + JSON.stringify(data));
     });
   },
   talk: function (text) {
@@ -36,7 +48,7 @@ var Agent = new JS.Class(Actor, {
 
 var wbh = new Agent('localhost:8080', 'agent/456', '10.50.61.103');
 wbh.setup();
-/*
+
 setInterval(function () { 
   wbh.echo(); 
   }, 30000);
@@ -48,4 +60,4 @@ wbh2.setup();
 setInterval(function () { 
   wbh2.echo(); 
   }, 40000);
-*/
+

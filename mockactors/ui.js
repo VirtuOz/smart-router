@@ -21,13 +21,20 @@ var UI = new JS.Class(Actor, {
     var self = this;
     var socket = self.callSuper();
     socket.on('talkback', function (data) {
-      self.log(data.ids.agent + ' said ' + data.payload.text);
+      var from = (!!data.metadata.livechat) ? data.ids.livechat : data.ids.agent;
+      self.livechat = data.ids.livechat;
+      self.log(from + ' said ' + data.payload.text);
       self.agent = data.ids.agent;
     });
   },
   talk: function (text) {
-    this.log('saying ' + text + ' to ' + this.agent);
-    this.socket.emit('talk', { ids: { ui: this.actorid, agent: this.agent }, metadata: {}, payload: { text: text }});
+    this.log('saying ' + text);
+    var msg = { ids: { ui: this.actorid, agent: this.agent }, metadata: {}, payload: { text: text }};
+    if (this.livechat) {
+      msg.ids.livechat = this.livechat;
+      msg.metadata.livechat = true;
+    }
+    this.socket.emit('talk', msg);
   }
 });
 
@@ -41,6 +48,14 @@ setTimeout(function () {
 setTimeout(function () {
   ui.talk('hello goodbye!');
 }, 3000);
+
+setTimeout(function () {
+  ui.talk('livechat');
+}, 7000);
+
+setTimeout(function () {
+  ui.talk('woohoo');
+}, 10000);
 
 /*setInterval(function () { 
   ui.log('quack');

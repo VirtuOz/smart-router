@@ -1,0 +1,42 @@
+/*
+ * Copyright 2012 VirtuOz Inc.  All rights reserved.
+ */
+
+/**
+ *
+ * @author ccauchois
+ * @created 2012-10-29
+ */
+ 
+require('jsclass');
+JS.require('JS.Class');
+var Actor = require('./actor');
+
+var LiveChat = new JS.Class(Actor, {
+  initialize: function (server, endpoint, id) {
+    this.callSuper(server, endpoint, id);
+  },
+  setup: function () {
+    this.callSuper(this.localsetup);
+  },
+  localsetup: function (self) {
+    self.socket.on('talk', function (data) {
+      self.log(data.ids.ui + ' said ' + data.payload.text);
+      self.UI = data.ids.ui;
+      self.talk('hello from human');
+    });
+    self.socket.on('sessionrequest', function (data) {
+      self.agent = data.ids.agent;
+      self.UI = data.ids.ui;
+      self.log('livechat session requested from ' + data.ids.agent + ' for ' + data.ids.ui);
+      self.talk('you are connected to livechat');
+    });
+  },
+  talk: function (text) {
+    this.log('saying ' + text);
+    this.socket.emit('talkback', { ids: { ui: this.UI, agent: this.agent, livechat: this.endpoint }, metadata: { livechat: true }, payload: { text: text }});
+  }
+});
+
+var livechat = new LiveChat('localhost:8080', 'livechat/456', 'server1');
+livechat.setup();
