@@ -19,10 +19,8 @@ var Agent = new JS.Class(Actor, {
     this.livechat = 'livechat/456';
   },
   setup: function () {
-    this.callSuper(this.localsetup);
-  },
-  localsetup: function (self) {
-    self.log('registering talk');
+    var self = this;
+    this.callSuper();
     self.socket.on('talk', function (data) {
       self.UI = data.ids.ui;
       self.log(data.ids.ui + ' said ' + data.payload.text);

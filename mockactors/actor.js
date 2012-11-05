@@ -18,7 +18,7 @@ module.exports = new JS.Class({
     this.actorid = endpoint + '/' + id;
     this.endpoint = endpoint;
   },
-  setup: function (localsetup) {
+  setup: function () {
     var self = this;
     self.socket.once('connect', function () {
       self.log('connected');
@@ -35,10 +35,6 @@ module.exports = new JS.Class({
       self.socket.on('echo', function (data) {
         self.log('got echo: ' + JSON.stringify(data));
       });
-      if (localsetup) {
-        self.log('localsetup');
-        localsetup(self);
-      }
     });
     self.socket.on('connection_failed', function (err) {
       self.log('connection failed '+ err);
