@@ -11,6 +11,8 @@
 JS.require('JS.Class');
 
 var io = require('socket.io-client');
+
+var logger = require('../util/logger');
  
 module.exports = new JS.Class({
   initialize: function (server, endpoint, id) {
@@ -37,15 +39,18 @@ module.exports = new JS.Class({
       });
     });
     self.socket.on('connection_failed', function (err) {
-      self.log('connection failed '+ err);
+      self.error('connection failed '+ err);
     });
     self.socket.on('error', function (err) {
-      self.log('error '+ err);
+      self.error(err);
     });
     return self.socket;
   },
   log: function (msg) {
-    console.log(this.actorid + ': ' + msg);
+    logger.info(this.actorid + ': ' + msg);
+  },
+  error: function (msg) {
+    logger.error(this.actorid + ': ' + msg);
   },
   echo: function () {
     this.socket.emit('echo', { ids: { default: this.actorid}, metadata: {}, payload: 'quack!!' });

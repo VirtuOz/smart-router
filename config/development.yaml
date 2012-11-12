@@ -1,0 +1,23 @@
+log:
+    level: 'debug'
+    filename: 'smart-router.log'
+
+io:
+    host: 'localhost'
+    port: 8080
+    logLevel: 1
+
+amqp:
+    url: 'amqp://127.0.0.1'
+
+endpoints:
+    agent:
+        name: 'agent'
+        id: 456
+    livechat:
+        name: 'livechat'
+        id: 456
+    ui:
+        name: 'ui'
+        id: 456
+

@@ -10,6 +10,7 @@
  
 require('jsclass');
 JS.require('JS.Class');
+var logger = require('../util/logger');
 var Actor = require('./actor');
 
 var Agent = new JS.Class(Actor, {
@@ -35,7 +36,7 @@ var Agent = new JS.Class(Actor, {
       }
     });
     self.socket.on('log', function (data) {
-      console.log('logging ' + JSON.stringify(data));
+      logger.info('logging ' + JSON.stringify(data));
     });
   },
   talk: function (text) {
@@ -44,18 +45,4 @@ var Agent = new JS.Class(Actor, {
   }
 });
 
-var wbh = new Agent('localhost:8080', 'agent/456', '10.50.61.103');
-wbh.setup();
-
-setInterval(function () { 
-  wbh.echo(); 
-  }, 30000);
-  
-
-var wbh2 = new Agent('127.0.0.1:8080', 'agent/456', '10.50.61.104');
-wbh2.setup();
-
-setInterval(function () { 
-  wbh2.echo(); 
-  }, 40000);
-
+module.exports.Agent = Agent;

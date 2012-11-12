@@ -37,5 +37,4 @@ var LiveChat = new JS.Class(Actor, {
   }
 });
 
-var livechat = new LiveChat('localhost:8080', 'livechat/456', 'server1');
-livechat.setup();
+module.exports.LiveChat = LiveChat;
