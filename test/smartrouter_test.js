@@ -66,7 +66,7 @@ describe('Smartrouter tests.', function()
     });
     mockedUI.setup();
   });
-/*
+
   it('sould connect a livechat to the smartrouter', function(done)
   {
     console.log('starting the livechat test');
@@ -117,5 +117,5 @@ describe('Smartrouter tests.', function()
       done();
     });
     mockedUI.talk('livechat');
-  });*/
+  });
 });
