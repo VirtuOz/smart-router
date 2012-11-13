@@ -21,9 +21,9 @@ var mockedLiveChat;
 // /!\ Those tests need to have a local RabbitMQ running
 describe('Smartrouter tests.', function()
 {
-  before(function(done)
+  beforeEach(function(done)
          {
-           console.log('Will start smartrouter');
+           logger.info('Will start smartrouter');
            smartrouter.once('started', function () {
              logger.info('SmartRouter started');
              done();
@@ -31,15 +31,15 @@ describe('Smartrouter tests.', function()
 
            smartrouter.start(config);
          });
-//  afterEach(function(done)
-//        {
-//          smartrouter.stop();
-//          smartrouter.io.server.once('close', function()
-//          {
-//            logger.info('smartrouter stopped');
-//            done();
-//          });
-//        });
+  afterEach(function(done)
+        {
+          smartrouter.stop();
+          smartrouter.once('stopped', function()
+          {
+            logger.info('smartrouter stopped');
+            done();
+          });
+        });
 
   it('should connect an agent to the smartrouter', function(done)
   {
@@ -57,7 +57,7 @@ describe('Smartrouter tests.', function()
   it('sould connect an ui to the smartrouter', function(done)
   {
     console.log('starting ui test');
-    mockedUI = new UI('localhost:8080', 'ui/456', 'ui456');
+    mockedUI = new UI('127.0.0.1:8080', 'ui/456', 'ui456');
     // If we receive the hello callback, it means that we have correctly handshaked
     // and that the smartrouter has accepted us
     mockedUI.socket.once('hello', function()
@@ -66,7 +66,7 @@ describe('Smartrouter tests.', function()
     });
     mockedUI.setup();
   });
-
+/*
   it('sould connect a livechat to the smartrouter', function(done)
   {
     console.log('starting the livechat test');
@@ -117,5 +117,5 @@ describe('Smartrouter tests.', function()
       done();
     });
     mockedUI.talk('livechat');
-  });
+  });*/
 });
