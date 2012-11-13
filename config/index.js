@@ -13,7 +13,7 @@ var QUEUEFLAG = require('../lib/const').QUEUEFLAG;
 
 exports.local = 
 {
-  port: CONFIG.io.port,
+  port: process.env.PORT || CONFIG.io.port || 3000,
   amqp: { url: CONFIG.amqp.url },
   endpoints: [ 
     { name: CONFIG.endpoints.agent.name, ids: [ CONFIG.endpoints.agent.id, 457 ], queue: QUEUEFLAG.actor | QUEUEFLAG.endpoint },

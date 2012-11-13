@@ -2,9 +2,9 @@
  * Copyright 2012 VirtuOz Inc. All rights reserved.
  */
 
-var UI = require('../../mockactors/ui').UI;
+var UI = require('../mockactors/ui').UI;
 
-var ui = new UI('localhost:8080', 'ui/456', '10.50.61.103');
+var ui = new UI('localhost:8080', 'ui/456', 'ui_id');
 ui.setup();
 
 setTimeout(function () {

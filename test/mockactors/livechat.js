@@ -10,7 +10,7 @@
  
 require('jsclass');
 JS.require('JS.Class');
-var Actor = require('./actor');
+var Actor = require('./../../lib/actor');
 
 var LiveChat = new JS.Class(Actor, {
   initialize: function (server, endpoint, id) {
