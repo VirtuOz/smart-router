@@ -5,7 +5,7 @@
 var UI = require('../mockactors/ui').UI;
 
 var ui = new UI('localhost:8080', 'ui/456', 'ui_id');
-ui.setup();
+ui.connect();
 
 setTimeout(function () {
   ui.talk('hello world!');

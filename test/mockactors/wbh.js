@@ -19,7 +19,7 @@ var Agent = new JS.Class(Actor, {
     this.UI = 'ui/456';
     this.livechat = 'livechat/456';
   },
-  setup: function () {
+  connect: function () {
     var self = this;
     this.callSuper();
     self.socket.on('talk', function (data) {

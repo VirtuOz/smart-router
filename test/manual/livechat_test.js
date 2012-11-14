@@ -5,4 +5,4 @@
 var LiveChat = require('../mockactors/livechat').LiveChat;
 
 var livechat = new LiveChat('localhost:8080', 'livechat/456', 'server1');
-livechat.setup();
+livechat.connect();

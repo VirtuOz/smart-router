@@ -16,7 +16,7 @@ var LiveChat = new JS.Class(Actor, {
   initialize: function (server, endpoint, id) {
     this.callSuper(server, endpoint, id);
   },
-  setup: function () {
+  connect: function () {
     var self = this;
     this.callSuper(this.localsetup);
     self.socket.on('talk', function (data) {

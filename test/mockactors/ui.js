@@ -17,7 +17,7 @@ var UI = new JS.Class(Actor, {
     this.agent = 'agent/456';
   },
   
-  setup: function () {
+  connect: function () {
     var self = this;
     var socket = self.callSuper();
     socket.on('talkback', function (data) {
