@@ -42,7 +42,7 @@ exports.local =
         smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
-    { endpoint: CONFIG.endpoints.livechat.name, messagetype: 'talkback', // when we receive a 'talkback' message on the 'agent' endpoint (ie. from the agent),
+    { endpoint: CONFIG.endpoints.livechat.name, messagetype: 'talkback', // when we receive a 'talkback' message on the 'livechat' endpoint (ie. from the livechat),
       action: function (message, socket, smartrouter) {
         smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
