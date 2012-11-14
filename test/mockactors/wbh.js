@@ -32,7 +32,7 @@ var Agent = new JS.Class(Actor, {
         msg.payload.text = 'requesting session';
         self.socket.emit('sessionrequest', msg);
       } else {
-        self.talk('hello again');
+        self.talk('hello from agent');
       }
     });
     self.socket.on('log', function (data) {
