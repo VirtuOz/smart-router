@@ -23,12 +23,14 @@ var winston = require('winston'),
 // Default level are in npm-config, with DEBUG after INFO, weird
 var customLevels = {
   levels: {
-    debug: 0,
-    info: 1,
-    warn: 2,
-    error: 3
+    trace: 0,
+    debug: 1,
+    info: 2,
+    warn: 3,
+    error: 4
   },
   colors: {
+    trace: 'blue',
     debug: 'cyan',
     info: 'green',
     warn: 'magenta',

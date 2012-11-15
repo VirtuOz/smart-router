@@ -14,11 +14,11 @@ var QUEUEFLAG = require('../lib/const').QUEUEFLAG;
 exports.local = 
 {
   port: process.env.PORT || CONFIG.io.port || 3000,
-  amqp: { url: CONFIG.amqp.url },
+  amqp: { url: 'amqp://127.0.0.1' },
   endpoints: [ 
-    { name: CONFIG.endpoints.agent.name, ids: [ CONFIG.endpoints.agent.id, 457 ], queue: QUEUEFLAG.actor | QUEUEFLAG.endpoint },
-    { name: CONFIG.endpoints.livechat.name, ids: [ CONFIG.endpoints.livechat.id ], queue: QUEUEFLAG.endpoint },
-    { name: CONFIG.endpoints.ui.name, ids: [ CONFIG.endpoints.ui.id ] }
+    { name: 'agent', ids: [ 456, 457 ], queue: QUEUEFLAG.actor | QUEUEFLAG.endpoint },
+    { name: 'livechat', ids: [ 456 ], queue: QUEUEFLAG.endpoint },
+    { name: 'ui', ids: [ 456 ] }
   ],
   routes: [
     { endpoint: '*', messagetype: 'echo', // received on any endpoint
@@ -26,7 +26,7 @@ exports.local =
         smartrouter.publish(message.ids.default, 'echo', message);
       }
     },
-    { endpoint: CONFIG.endpoints.ui.name, messagetype: 'talk',
+    { endpoint: 'ui', messagetype: 'talk',
       action: function (message, socket, smartrouter) {  
         if (message.ids.livechat && message.metadata.livechat) {
           smartrouter.publish(message.ids.livechat, 'talk', message);
@@ -37,17 +37,17 @@ exports.local =
         }
       }
     },
-    { endpoint: CONFIG.endpoints.agent.name, messagetype: 'talkback', // when we receive a 'talkback' message on the 'agent' endpoint (ie. from the agent),
+    { endpoint: 'agent', messagetype: 'talkback', // when we receive a 'talkback' message on the 'agent' endpoint (ie. from the agent),
       action: function (message, socket, smartrouter) {
         smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
-    { endpoint: CONFIG.endpoints.livechat.name, messagetype: 'talkback', // when we receive a 'talkback' message on the 'livechat' endpoint (ie. from the livechat),
+    { endpoint: 'livechat', messagetype: 'talkback', // when we receive a 'talkback' message on the 'livechat' endpoint (ie. from the livechat),
       action: function (message, socket, smartrouter) {
         smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
-    { endpoint: CONFIG.endpoints.agent.name, messagetype: 'sessionrequest',
+    { endpoint: 'agent', messagetype: 'sessionrequest',
       action: function (message, socket, smartrouter) {
         smartrouter.publish(message.ids.livechat, 'sessionrequest', message);
       }

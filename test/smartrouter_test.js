@@ -8,11 +8,15 @@ var logger = require('../util/logger');
 
 var smartrouter = require('../lib/smartrouter.js').instance;
 var config = require('../config').local;
+var Actor = require('../lib/actor');
 var Agent = require('./mockactors/wbh').Agent;
 var UI = require('./mockactors/ui').UI;
 var LiveChat = require('./mockactors/livechat').LiveChat;
 
 
+/* We instantiate the clients with the following params to be able to
+ * properly shutdown the smart-router between tests.
+ */
 var clientsParams = { reconnect: false, 'force new connection': true };
 
 // /!\ Those tests need to have a local RabbitMQ running
@@ -20,7 +24,6 @@ describe('Smartrouter tests.', function()
 {
   beforeEach(function(done)
          {
-           logger.info('Starting smartrouter...');
            smartrouter.once('started', function () {
              smartrouter.io.set('log level', 1);
              smartrouter.io.set('close timeout', .2);
@@ -40,6 +43,26 @@ describe('Smartrouter tests.', function()
             done();
           });
         });
+
+
+  it('will create a raw Actor, connect it to the smartrouter and make an echo', function(done)
+  {
+    logger.debug('************************************************************');
+    logger.debug('STARTING TEST "connect an Actor to the smartrouter and ECHO"');
+    logger.debug('************************************************************');
+    var actor = new Actor('localhost:8080', 'agent/456', 'rawActor', clientsParams);
+    actor.connect();
+
+    actor.socket.once('hello', function()
+    {
+      actor.echo();
+    });
+    actor.socket.once('echo', function()
+    {
+      // Echo received back
+      done();
+    });
+  });
 
   it('should connect an agent to the smartrouter', function(done)
   {
@@ -61,9 +84,7 @@ describe('Smartrouter tests.', function()
     logger.debug('************************************************');
     logger.debug('STARTING TEST "connect an UI to the smartrouter"');
     logger.debug('************************************************');
-    var mockedAgent = new Agent('localhost:8080', 'agent/456', 'agent456', clientsParams);
-    var mockedUI = new UI('localhost:8080', 'ui/456', 'ui456');
-    mockedAgent.connect();
+    var mockedUI = new UI('localhost:8080', 'ui/456', 'ui456', clientsParams);
     mockedUI.connect();
     // If we receive the hello callback, it means that we have correctly handshaked
     // and that the smartrouter has accepted us
@@ -78,9 +99,7 @@ describe('Smartrouter tests.', function()
     logger.debug('*****************************************************');
     logger.debug('STARTING TEST "connect a Livechat to the smartrouter"');
     logger.debug('*****************************************************');
-    var mockedAgent = new Agent('localhost:8080', 'agent/456', 'agent456', clientsParams);
     var mockedLiveChat = new LiveChat('localhost:8080', 'livechat/456', 'livechat456', clientsParams);
-    mockedAgent.connect();
     mockedLiveChat.connect();
     // If we receive the hello callback, it means that we have correctly handshaked
     // and that the smartrouter has accepted us
@@ -194,7 +213,7 @@ describe('Smartrouter tests.', function()
       mockedLiveChat.connect();
       mockedLiveChat.socket.once('hello', function()
       {
-        // Normally, UI has sent a message containing its id that the Agent has stored
+        // Normally, Agent has sent a message containing the UI's id that the LiveChat has stored
         mockedLiveChat.UI = mockedUI.actorid;
         mockedLiveChat.talk('Hello, how can I help you?');
       });

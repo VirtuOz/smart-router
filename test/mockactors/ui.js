@@ -12,8 +12,8 @@ JS.require('JS.Class');
 var Actor = require('./../../lib/actor');
 
 var UI = new JS.Class(Actor, {
-  initialize: function (server, endpoint, id) {
-    this.callSuper(server, endpoint, id);
+  initialize: function (server, endpoint, id, connectionParams) {
+    this.callSuper(server, endpoint, id, connectionParams);
     this.agent = 'agent/456';
   },
   

@@ -14,8 +14,8 @@ var logger = require('../../util/logger');
 var Actor = require('./../../lib/actor');
 
 var Agent = new JS.Class(Actor, {
-  initialize: function (server, endpoint, id) {
-    this.callSuper(server, endpoint, id);
+  initialize: function (server, endpoint, id, connectionParams) {
+    this.callSuper(server, endpoint, id, connectionParams);
     this.UI = 'ui/456';
     this.livechat = 'livechat/456';
   },
