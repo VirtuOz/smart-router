@@ -109,7 +109,7 @@ describe('Smartrouter tests.', function()
     });
   });
 
-  it('should send a message from the ui to the agent', function(done)
+  it('should send a message from the ui to the agent, which will reply', function(done)
   {
     logger.debug('***********************************');
     logger.debug('STARTING TEST "UI talk to an agent"');
@@ -136,7 +136,6 @@ describe('Smartrouter tests.', function()
     {
       mockedUI.talk('Hey is there someone?');
     });
-
   });
 
   it('should send a message from the agent to the UI', function(done)
@@ -213,9 +212,78 @@ describe('Smartrouter tests.', function()
       mockedLiveChat.connect();
       mockedLiveChat.socket.once('hello', function()
       {
-        // Normally, Agent has sent a message containing the UI's id that the LiveChat has stored
+        // Normally, Agent has previously sent a message containing the UI's id that the LiveChat has stored
         mockedLiveChat.UI = mockedUI.actorid;
         mockedLiveChat.talk('Hello, how can I help you?');
+      });
+    });
+  });
+
+  // UI will publish a message to the agent queue, which is not connected yet.
+  // Then the targeted agent connects. It should receive the message.
+  it('should keep the message in the Queue until the actor connect and get it', function(done)
+  {
+    logger.debug('*****************************************************************************************');
+    logger.debug('STARTING TEST "SmartRouter keep message in memory if the targeted actor is not connected"');
+    logger.debug('*****************************************************************************************');
+    var mockedAgent = new Agent('localhost:8080', 'agent/456', 'agent456', clientsParams);
+    var mockedUI = new UI('localhost:8080', 'ui/456', 'ui456', clientsParams);
+    mockedUI.connect();
+    mockedUI.socket.once('hello', function()
+    {
+      mockedUI.talk('This message will not be delivered immediately');
+    });
+
+    setTimeout(function()
+               {
+                 mockedAgent.connect();
+                 mockedAgent.socket.once('talk', function(data)
+                 {
+                   // Message has been kept waiting for agent to connect
+                   assert.equal('This message will not be delivered immediately', data.payload.text);
+                   done();
+                 });
+               }, 1000);
+  });
+
+  // UI will publish a message to the agent queue, which is not connected yet.
+  // We shutdown the smart-router, and restart it
+  // We connect the targeted agent, and we check that the message survived the shutdown
+  it('should keep the message in RabbitMQ during a smart-router shutdown', function(done)
+  {
+    logger.debug('**********************************************************');
+    logger.debug('STARTING TEST "Messages survive the smart-router shutdown"');
+    logger.debug('**********************************************************');
+    var mockedAgent = new Agent('localhost:8080', 'agent/456', 'agent456', clientsParams);
+    var mockedUI = new UI('localhost:8080', 'ui/456', 'ui456', clientsParams);
+    mockedUI.connect();
+    mockedUI.socket.once('hello', function()
+    {
+      mockedUI.talk('This message will survive a shutdown');
+    });
+
+    setTimeout(function()
+               {
+                 smartrouter.stop();
+                 smartrouter.once('stopped', function()
+                 {
+                   logger.info('Smartrouter stopped. We hope no message will be lost. Restarting...');
+                   smartrouter.start(config);
+                 });
+               }, 1000);
+
+    smartrouter.once('started', function () {
+      smartrouter.io.set('log level', 1);
+      smartrouter.io.set('close timeout', .2);
+      smartrouter.io.set('client store expiration', .2);
+      logger.info('SmartRouter restarted. Connecting the agent to it');
+      mockedAgent.connect();
+      // We should receive the message sent by the UI before the shutdown
+      mockedAgent.socket.once('talk', function(data)
+      {
+        // Message has been kept in RabbitMQ!
+        assert.equal('This message will survive a shutdown', data.payload.text);
+        done();
       });
     });
   });
