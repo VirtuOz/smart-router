@@ -14,3 +14,5 @@ xunit.xml
 
 config/runtime.json
 smart-router.iml
+
+smart-router.log

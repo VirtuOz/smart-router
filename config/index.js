@@ -72,12 +72,12 @@ exports.basic = {
     },
     { endpoint: 'actor1', messagetype: 'talk', // when we receive a 'talk' message on the 'actor1' endpoint (ie. from the actor1),
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.addressee, 'talk', message); // we publish it to the message.ids.actor2 queue (ie. to actor2)
+        smartrouter.publish(message.ids.addressee, 'talk', message); // we publish it to the message.ids.addressee queue (ie. to actor2)
       }
     },
     { endpoint: 'actor2', messagetype: 'talk', // when we receive a 'talk' message on the 'actor2' endpoint (ie. from the actor2),
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.addressee, 'talk', message); // we publish it to the message.ids.actor1 queue (ie. to actor1)
+        smartrouter.publish(message.ids.addressee, 'talk', message); // we publish it to the message.ids.addressee queue (ie. to actor1)
       }
     }
   ]

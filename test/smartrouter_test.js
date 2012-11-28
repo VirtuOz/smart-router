@@ -3,6 +3,7 @@
  */
 
 var assert = require('chai').assert;
+var io = require('socket.io-client');
 
 var logger = require('../util/logger');
 
@@ -285,6 +286,41 @@ describe('Smartrouter tests.', function()
         assert.equal('This message will survive a shutdown', data.payload.text);
         done();
       });
+    });
+  });
+
+  // We will try to connect on an undefined endpoint (/agent/458).
+  // As it is not registered, we will not receive the handshake and will be disconnected (timeout = 200ms).
+  // Then we send a 'registerNewEndpointId' for /agent/458, and we try again to connect.
+  it('should add a new endpoint for a given actor', function(done)
+  {
+    logger.debug('***********************************************************');
+    logger.debug('STARTING TEST "We will add a new Endpoint ID for the Agent"');
+    logger.debug('***********************************************************');
+    var handshakedBeforeRegistration = false;
+    var mockedAgent = new Agent('localhost:8080', 'agent/458', 'agent458', clientsParams);
+    mockedAgent.connect();
+
+    mockedAgent.socket.once('disconnect', function() {
+      logger.debug('We have been disconnected without handshake because endpoint 458 is not registered.');
+      var socket = io.connect('http://localhost:8080/');
+      socket.once('connect', function() {
+        socket.emit('registerNewEndpointId', { name: 'agent', id: 458 });
+        socket.on('endpointRegistered', function() {
+          logger.debug('Now that endpoint 458 is registered, we will be handshaked.');
+          mockedAgent.connect();
+          mockedAgent.socket.once('hello', function()
+          {
+            assert.isFalse(handshakedBeforeRegistration);
+            done();
+          });
+        });
+      });
+    });
+    mockedAgent.socket.once('hello', function()
+    {
+      // We will never pass here because agent/458 is not registered yet
+      handshakedBeforeRegistration = true;
     });
   });
 });
