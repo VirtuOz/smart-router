@@ -1,3 +1,4 @@
+.idea
 .idea/workspace.xml
 .idea/libraries
 
@@ -10,3 +11,8 @@ node_modules
 .DS_Store
 
 xunit.xml
+
+config/runtime.json
+smart-router.iml
+
+smart-router.log
