@@ -1,0 +1,3 @@
+log:
+    level: 'trace'
+    filename: 'smart-router.log'

@@ -9,15 +9,15 @@
  */
 require('jsclass');
 JS.require('JS.Class');
-var Actor = require('./actor');
+var Actor = require('./../../lib/actor');
 
 var UI = new JS.Class(Actor, {
-  initialize: function (server, endpoint, id) {
-    this.callSuper(server, endpoint, id);
+  initialize: function (server, endpoint, id, connectionParams) {
+    this.callSuper(server, endpoint, id, connectionParams);
     this.agent = 'agent/456';
   },
   
-  setup: function () {
+  connect: function () {
     var self = this;
     var socket = self.callSuper();
     socket.on('talkback', function (data) {
@@ -28,7 +28,7 @@ var UI = new JS.Class(Actor, {
     });
   },
   talk: function (text) {
-    this.log('saying ' + text);
+    this.log('saying ' + text + ' to agent ' + this.agent);
     var msg = { ids: { ui: this.actorid, agent: this.agent }, metadata: {}, payload: { text: text }};
     if (this.livechat) {
       msg.ids.livechat = this.livechat;
@@ -38,27 +38,4 @@ var UI = new JS.Class(Actor, {
   }
 });
 
-var ui = new UI('localhost:8080', 'ui/456', '10.50.61.103');
-ui.setup();
-
-setTimeout(function () {  
-  ui.talk('hello world!');
-}, 1000);
-
-setTimeout(function () {
-  ui.talk('hello goodbye!');
-}, 3000);
-
-setTimeout(function () {
-  ui.talk('livechat');
-}, 7000);
-
-setTimeout(function () {
-  ui.talk('woohoo');
-}, 10000);
-
-/*setInterval(function () { 
-  ui.log('quack');
-  ui.echo(); 
-  }, 5000);
-  */
+module.exports.UI = UI;

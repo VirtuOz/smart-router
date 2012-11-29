@@ -10,13 +10,13 @@
  
 require('jsclass');
 JS.require('JS.Class');
-var Actor = require('./actor');
+var Actor = require('./../../lib/actor');
 
 var LiveChat = new JS.Class(Actor, {
-  initialize: function (server, endpoint, id) {
-    this.callSuper(server, endpoint, id);
+  initialize: function (server, endpoint, id, connectionParams) {
+    this.callSuper(server, endpoint, id, connectionParams);
   },
-  setup: function () {
+  connect: function () {
     var self = this;
     this.callSuper(this.localsetup);
     self.socket.on('talk', function (data) {
@@ -37,5 +37,4 @@ var LiveChat = new JS.Class(Actor, {
   }
 });
 
-var livechat = new LiveChat('localhost:8080', 'livechat/456', 'server1');
-livechat.setup();
+module.exports.LiveChat = LiveChat;
