@@ -1,6 +1,70 @@
 smart-router
 ============
 
+The *smart-router* is a message routing system that routes messages based on their content. 
+It is meant to be light-weight and HA. Internally, it uses [RabbitMQ](http://www.rabbitmq.com/)
+to handle the messages and [socket.io](http://socket.io/) as its transport protocol. It can be 
+used to connect server-side services as well as client-side applications.
+
+To use it:
+```
+npm install smart-router
+```
+
+Concepts
+--------
+### Endpoints
+The *smart-router* will listen to several end points as defined in its config file. One end point can be divided
+into sub-endpoints who will share the same route definitions. 
+
+### Actors 
+An Actor is a client of the *smart-router*. It has its own unique Id. It will connect to an endpoint or a sub-endpoint
+to publish and receive messages. They can be configured to receive messages sent directly to them or sent to their 
+endpoint.
+
+### Messages
+Messages are exchanged by the Actors through the *smart-router*. It will then introspect them to route them to the 
+right actor or to the right endpoint for one actor to pick them up.
+
+A message has a type and a body which can be repesented like that:
+```javascript
+{ 
+  ids: { },
+  metadata: { },
+  payload: { }
+}
+```
+**ids** contains the ids of the actors or endpoints concerned by the message. By looking, preferably, at the **metadata**,
+the *smart-router* will choose which of these actors it will route the message to. The **payload** contains application 
+specific data, whereas **metadata** will contain data used by the routing. (The *smart-router* still has access to the 
+**payload** and can decide using it, but it is best to have a clean separation between the two.)
+
+### Routes
+A Route is a function that is called when the *smart-router* receives a message of a specific type on a specific end point.
+In this function, the *smart-router* can look at the endpoint, the message type and the message body to define wht to do 
+with it. Usually, it will publish it as-is to another and point or actor, but it can modify it, fork it and publish it to 
+several endpoints.
+In the following route, when we receive a message of type **business** from the **serviceA** endpoint, we check if it is
+important. If it is, we route it to **serviceC** enpoint as an **important** message and log it by sending it to the logger
+as a **log** message. If not, we forward it as-is to **serviceB**.
+```javascript
+{ 
+  endpoint: 'serviceA', 
+  messagetype: 'business',
+  action: function (message, socket, smartrouter) {  
+    if (message.ids.serviceC && message.metadata.isImportant) {
+      smartrouter.publish(message.ids.serviceC, 'important', message);
+      smartrouter.publish(message.ids.logger, 'log', message);
+    } 
+    else {
+      smartrouter.publish(message.ids.serviceB, 'business', message); 
+    }
+  }
+}
+``` 
+
+Old
+---
 As discussed in our Arch session, the Smart Router is a node.js application 
 and a RabbitMQ [clustered broker](http://www.rabbitmq.com/clustering.html). 
 The different queues will be [mirrored,](http://www.rabbitmq.com/ha.html) 
