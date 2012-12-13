@@ -7,9 +7,10 @@ var io = require('socket.io-client');
 
 var logger = require('../util/logger');
 
-var smartrouter = require('../lib/smartrouter.js').instance;
+var SRLib = require('../lib');
+var smartrouter = new SRLib.SmartRouter();
 var config = require('../config').local;
-var Actor = require('../lib/actor');
+var Actor = SRLib.Actor;
 var Agent = require('./mockactors/wbh').Agent;
 var UI = require('./mockactors/ui').UI;
 var LiveChat = require('./mockactors/livechat').LiveChat;

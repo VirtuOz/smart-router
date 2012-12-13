@@ -5,7 +5,7 @@
 require('jsclass');
 JS.require('JS.Class');
 var logger = require('../../util/logger');
-var Actor = require('./../../lib/actor');
+var Actor = require('./../../lib').Actor;
 
 var BasicActor = new JS.Class(Actor, {
   initialize: function() {

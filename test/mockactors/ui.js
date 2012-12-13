@@ -9,7 +9,7 @@
  */
 require('jsclass');
 JS.require('JS.Class');
-var Actor = require('./../../lib/actor');
+var Actor = require('./../../lib').Actor;
 
 var UI = new JS.Class(Actor, {
   initialize: function (server, endpoint, id, connectionParams) {

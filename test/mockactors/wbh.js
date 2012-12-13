@@ -11,7 +11,7 @@
 require('jsclass');
 JS.require('JS.Class');
 var logger = require('../../util/logger');
-var Actor = require('./../../lib/actor');
+var Actor = require('./../../lib').Actor;
 
 var Agent = new JS.Class(Actor, {
   initialize: function (server, endpoint, id, connectionParams) {
