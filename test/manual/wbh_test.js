@@ -4,7 +4,7 @@
 
 var Agent = require('../mockactors/wbh.js').Agent;
 
-var wbh = new Agent('localhost:8080', 'agent/456', 'wbh1_id');
+var wbh = new Agent('http://localhost:8080', 'agent/456', 'wbh1_id');
 wbh.connect();
 
 //setInterval(function () {

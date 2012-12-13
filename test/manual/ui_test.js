@@ -4,7 +4,7 @@
 
 var UI = require('../mockactors/ui').UI;
 
-var ui = new UI('localhost:8080', 'ui/456', 'ui_id');
+var ui = new UI('http://localhost:8080', 'ui/456', 'ui_id');
 ui.connect();
 
 setTimeout(function () {
