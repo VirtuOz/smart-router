@@ -138,9 +138,23 @@ This configuration will contain:
         you will do something like: `smartrouter.publish(queueId, 'messagetype', message)` which will publish a
         message of type `messagetype` to the queue `queueid`.
 
+### Handshake protocol
+If you develop your actors in JS, you only have to use the `Actor` class as describe in the next section.
+
+In any other language, you would need to use a [socket.io](http://socket.io/) client and to implement the
+handshake protocol:
+
+1. when a new Actor connects, the *smart-router* emits an empty `whoareyou` message.
+2. the Actor must respond with a `iam` message whose payload will be its unique id. These ids have to be unique 
+through out the whole plateform.
+3. the *smart-router* responds then with a `hello` empty message.
+4. when receiving a message from an unknown Actor (unknown unique id), the *smart-router* will emit a `whoareyou` message 
+containing the previous message as a payload (payload.type being the message type, and payload.message the message body.)
+5. it is expected that the Actor then emits a `iam` with its id and re-emits the rejected message. 
+
 ### Writing actors
 
-All actors need to extend the raw Actor class defined in `lib/actor.js`.
+In JS, all actors need to extend the raw Actor class defined in `lib/actor.js`.
 
 ```javascript
 var Actor = require('smart-router').Actor;
@@ -185,3 +199,12 @@ The scenario is very simple:
 - The message is routed to actor1 which reply to the queue `actor/2/actor_id2` (subscribed by actor2)
 - ...
 It stops after two back and forth.
+
+#### Tests
+The test folder contains different actors used to test the behaviour of the *smart-router*.
+
+1. `agent` is the main actor. It will decide of the flow of the messages by adding some metadata.
+2. `ui` simulates a UI. It can request to *talk* to the external `service`.
+3. `service` is an external service to which some messages can get routed.
+
+Use `mocha` from the command line to launch the tests.
