@@ -17,7 +17,7 @@ exports.local =
   amqp: { url: 'amqp://127.0.0.1' },
   endpoints: [ 
     { name: 'agent', ids: [ 456, 457 ], queue: QUEUEFLAG.actor | QUEUEFLAG.endpoint },
-    { name: 'livechat', ids: [ 456 ], queue: QUEUEFLAG.endpoint },
+    { name: 'service', ids: [ 456 ], queue: QUEUEFLAG.endpoint },
     { name: 'ui', ids: [ 456 ] }
   ],
   routes: [
@@ -28,8 +28,8 @@ exports.local =
     },
     { endpoint: 'ui', messagetype: 'talk',
       action: function (message, socket, smartrouter) {  
-        if (message.ids.livechat && message.metadata.livechat) {
-          smartrouter.publish(message.ids.livechat, 'talk', message);
+        if (message.ids.service && message.metadata.service) {
+          smartrouter.publish(message.ids.service, 'talk', message);
           smartrouter.publish(message.ids.agent, 'log', message);
         } 
         else {
@@ -42,14 +42,14 @@ exports.local =
         smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
-    { endpoint: 'livechat', messagetype: 'talkback', // when we receive a 'talkback' message on the 'livechat' endpoint (ie. from the livechat),
+    { endpoint: 'service', messagetype: 'talkback', // when we receive a 'talkback' message on the 'service' endpoint (ie. from the service),
       action: function (message, socket, smartrouter) {
         smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
     { endpoint: 'agent', messagetype: 'sessionrequest',
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.livechat, 'sessionrequest', message);
+        smartrouter.publish(message.ids.service, 'sessionrequest', message);
       }
     }
 

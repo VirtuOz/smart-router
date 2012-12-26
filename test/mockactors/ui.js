@@ -9,7 +9,7 @@
  */
 require('jsclass');
 JS.require('JS.Class');
-var Actor = require('./../../lib').Actor;
+var Actor = require('../../lib').Actor;
 
 var UI = new JS.Class(Actor, {
   initialize: function (server, endpoint, id, connectionParams) {
@@ -21,8 +21,8 @@ var UI = new JS.Class(Actor, {
     var self = this;
     var socket = self.callSuper();
     socket.on('talkback', function (data) {
-      var from = (!!data.metadata.livechat) ? data.ids.livechat : data.ids.agent;
-      self.livechat = data.ids.livechat;
+      var from = (!!data.metadata.service) ? data.ids.service : data.ids.agent;
+      self.service = data.ids.service;
       self.log(from + ' said ' + data.payload.text);
       self.agent = data.ids.agent;
     });
@@ -30,9 +30,9 @@ var UI = new JS.Class(Actor, {
   talk: function (text) {
     this.log('saying ' + text + ' to agent ' + this.agent);
     var msg = { ids: { ui: this.actorid, agent: this.agent }, metadata: {}, payload: { text: text }};
-    if (this.livechat) {
-      msg.ids.livechat = this.livechat;
-      msg.metadata.livechat = true;
+    if (this.service) {
+      msg.ids.service = this.service;
+      msg.metadata.service = true;
     }
     this.socket.emit('talk', msg);
   }

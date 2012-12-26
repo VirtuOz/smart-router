@@ -11,13 +11,13 @@
 require('jsclass');
 JS.require('JS.Class');
 var logger = require('../../util/logger');
-var Actor = require('./../../lib').Actor;
+var Actor = require('../../lib').Actor;
 
 var Agent = new JS.Class(Actor, {
   initialize: function (server, endpoint, id, connectionParams) {
     this.callSuper(server, endpoint, id, connectionParams);
     this.UI = 'ui/456';
-    this.livechat = 'livechat/456';
+    this.service = 'service/456';
   },
   connect: function () {
     var self = this;
@@ -25,9 +25,9 @@ var Agent = new JS.Class(Actor, {
     self.socket.on('talk', function (data) {
       self.UI = data.ids.ui;
       self.log(data.ids.ui + ' said ' + data.payload.text);
-      if (data.payload.text === 'livechat') {
-        var msg = { ids: { ui: self.UI, agent: self.actorid, livechat: self.livechat }, metadata: { livechat: false }, 
-          payload: { text: 'transferring to livechat' }};
+      if (data.payload.text === 'service') {
+        var msg = { ids: { ui: self.UI, agent: self.actorid, service: self.service }, metadata: { service: false }, 
+          payload: { text: 'transferring to service' }};
         self.socket.emit('talkback', msg);
         msg.payload.text = 'requesting session';
         self.socket.emit('sessionrequest', msg);
