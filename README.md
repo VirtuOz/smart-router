@@ -38,7 +38,7 @@ A message has a type and a body which can be repesented like that:
 **ids** contains the ids of the actors or endpoints concerned by the message. By looking, preferably, at the **metadata**,
 the *smart-router* will choose which of these actors it will route the message to. The **payload** contains application 
 specific data, whereas **metadata** will contain data used by the routing. (The *smart-router* still has access to the 
-**payload** and can decide using it, but it is best to have a clean separation between the two.)
+**payload** and can decide using it, but it is better to have a clean separation between the two.)
 
 ### Routes
 A Route is a function that is called when the *smart-router* receives a message of a specific type on a specific end point.
@@ -84,6 +84,7 @@ With this configuration, the *smart-router* will listen to:
 * `/subendpoint/457`
 * `/actoronly/456`
 * `/endpointandactor`
+
 and will use the following queues:
 * `endpoint` of exchange `endpoint`
 * `subendpoint/456` of exchange `subendpoint/456`
@@ -91,6 +92,7 @@ and will use the following queues:
 * `_actorid_` of exchange `actoronly/456` where _actorid is the unique id of the actors connectiong to the end point
 * `endpointandactor` of exchange `endpointandactor`
 * `_actorid_` of exchange `endpointandactor` where _actorid is the unique id of the actors connectiong to the end point
+
 During its transit inside the *smart-router*, a message will:
 1. be received on the endpoint
 2. routed using the corresponding route function 
@@ -99,7 +101,7 @@ During its transit inside the *smart-router*, a message will:
 5. sent to an actor.
 
 ### High Availability
-Internally, the *samrt-router* is composed of two modules:
+Internally, the *smart-router* is composed of two modules:
 * a socket.io server written in node.js that handles the routing of the messages
 * a RabbitMQ cluster that handles the persistence and the publication of the messages.
 Any number of the node.js application can be deployed as long as they all connect to the same RabbitMQ cluster. A single message 
@@ -141,7 +143,7 @@ This configuration will contain:
 All actors need to extend the raw Actor class defined in `lib/actor.js`.
 
 ```javascript
-var Actor = require('smart-router).Actor;
+var Actor = require('smart-router').Actor;
 
 MyActor = new JS.Class(Actor, {
 

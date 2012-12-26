@@ -9,7 +9,7 @@ var logger = require('../util/logger');
 
 var SRLib = require('../lib');
 var smartrouter = new SRLib.SmartRouter();
-var config = require('../config').local;
+var config = require('./testconfig').local;
 var Actor = SRLib.Actor;
 var Agent = require('./mockactors/wbh').Agent;
 var UI = require('./mockactors/ui').UI;

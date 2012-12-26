@@ -55,30 +55,3 @@ exports.local =
 
   ]
 };
-
-exports.basic = {
-  port: process.env.PORT || 8080,
-  amqp: { url: 'amqp://127.0.0.1' },
-  endpoints: [
-    { name: 'actor1', ids: [ 33 ], queue: QUEUEFLAG.actor }, // smart-router will create a queue '[actorid]'
-    { name: 'actor2', ids: [ 33 ], queue: QUEUEFLAG.actor | QUEUEFLAG.endpoint } // smart-router will create 2 queue:
-                                                                                 // a generic 'actor2/33' and a specific '[actorid]'
-  ],
-  routes: [
-    { endpoint: '*', messagetype: 'echo', // received on any endpoint
-      action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.default, 'echo', message);
-      }
-    },
-    { endpoint: 'actor1', messagetype: 'talk', // when we receive a 'talk' message on the 'actor1' endpoint (ie. from the actor1),
-      action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.addressee, 'talk', message); // we publish it to the message.ids.addressee queue (ie. to actor2)
-      }
-    },
-    { endpoint: 'actor2', messagetype: 'talk', // when we receive a 'talk' message on the 'actor2' endpoint (ie. from the actor2),
-      action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.addressee, 'talk', message); // we publish it to the message.ids.addressee queue (ie. to actor1)
-      }
-    }
-  ]
-};
