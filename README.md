@@ -149,7 +149,7 @@ handshake protocol:
 through out the whole plateform.
 3. the *smart-router* responds then with a `hello` empty message.
 4. when receiving a message from an unknown Actor (unknown unique id), the *smart-router* will emit a `whoareyou` message 
-containing the previous message as a payload (payload.type being the message type, and payload.message the message body.)
+containing the previous message as a payload (`payload.type` being the message type, and `payload.message` the message body.)
 5. it is expected that the Actor then emits a `iam` with its id and re-emits the rejected message. 
 
 ### Writing actors
