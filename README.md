@@ -1,71 +1,117 @@
 smart-router
 ============
 
-As discussed in our Arch session, the Smart Router is a node.js application 
-and a RabbitMQ [clustered broker](http://www.rabbitmq.com/clustering.html). 
-The different queues will be [mirrored,](http://www.rabbitmq.com/ha.html) 
-to ensure HA of the Smart Router as a whole.
+The *smart-router* is a message routing system that routes messages based on their content. 
+It is meant to be light-weight and HA. Internally, it uses [RabbitMQ](http://www.rabbitmq.com/)
+to handle the messages and [socket.io](http://socket.io/) as its transport protocol. It can be 
+used to connect server-side services as well as client-side applications.
 
-The different Actors will connect to the SR the same way using a 
-[socket.io](http://socket.io/) type of connection (socket.io extends websocket
- in a sense that that websockets have only one listener for messages where 
- as socket.io sockets have different listeners per type of message.)
- 
-As long as wbh are still stateful and statically assigned, each wbh is a single Actor.
+To use it:
+```
+npm install smart-router
+```
 
-Each Actor is assigned a Queue.
+Concepts
+--------
+### Endpoints
+The *smart-router* will listen to several endpoints or sub-endpoints as defined in its config file. One end point can be 
+divided into sub-endpoints who will share the same route definitions, but if an endpoint has sub-endpoints, the *smart-router*
+will listen to the sub-endpoints and not the endpoint itself. 
 
-There is one Exchanger per Agent, one for the end users per Agent and one per LiveChat provider.
+### Actors 
+An Actor is a client of the *smart-router*. It has its own unique Id. It will connect to an endpoint or a sub-endpoint
+to publish and receive messages. They can be configured to receive messages sent directly to them or sent to their 
+endpoint.
 
-One an Actor connects, its type is determine by the URL it uses: eg. WBH 
-of Agent 456 opens a socket to `ws://smartrouter.virtuoz.com/agent/456`, 
-the UI for agent 456 will connect to `ws://smartrouter.virtuoz.com/ui/456`.
+### Messages
+Messages are exchanged by the Actors through the *smart-router*. It will then introspect them to route them to the 
+right actor or to the right endpoint for one actor to pick them up.
 
-Upon connection the socket is bound to the corresponding queue: (pseudo js)
+A message has a type and a body which can be repesented like that:
+```javascript
+{ 
+  ids: { },
+  metadata: { },
+  payload: { }
+}
+```
+**ids** contains the ids of the actors or endpoints concerned by the message. By looking, preferably, at the **metadata**,
+the *smart-router* will choose which of these actors it will route the message to. The **payload** contains application 
+specific data, whereas **metadata** will contain data used by the routing. (The *smart-router* still has access to the 
+**payload** and can decide using it, but it is better to have a clean separation between the two.)
 
-	var io = require('socket.io').listen(80);
-	var amqp = require('amqp').createConnection('amqp://');
+### Routes
+A Route is a function that is called when the *smart-router* receives a message of a specific type on a specific end point.
+In this function, the *smart-router* can look at the endpoint, the message type and the message body to define wht to do 
+with it. Usually, it will publish it as-is to another and point or actor, but it can modify it, fork it and publish it to 
+several endpoints.
+In the following route, when we receive a message of type **business** from the **serviceA** endpoint, we check if it is
+important. If it is, we route it to **serviceC** enpoint as an **important** message and log it by sending it to the logger
+as a **log** message. If not, we forward it as-is to **serviceB**.
+```javascript
+{ 
+  endpoint: 'serviceA', 
+  messagetype: 'business',
+  action: function (message, socket, smartrouter) {  
+    if (message.ids.serviceC && message.metadata.isImportant) {
+      smartrouter.publish(message.ids.serviceC, 'important', message);
+      smartrouter.publish(message.ids.logger, 'log', message);
+    } 
+    else {
+      smartrouter.publish(message.ids.serviceB, 'business', message); 
+    }
+  }
+}
+``` 
 
-	var agent456 = io
-	  .of('/agent/456') // handles connection on /agent/456
-	  .on('connection', function (socket) {
-		amqp.queue(socket.clientid, function (q) { // declares the queue named socket.clientid (we need to find what to put there).
-		  q.bind('agent/456', socket.clientid); // binds the socket to the agent exchanger and say that only message corresponding to socket.clientId need to be routed on the queue
-		  q.subscribe(function (message, headers, deliveryInfo) { // whenever we get a message on the queue, we send it back on the socket
-			socket.emit(deliveryInfo.appId, message.data); // deliveryInfo.appId is the type of message (we need to find what to put there).
-		  });
-		});
-	  });
+### Queues and Exchanges
+Queues and Exchanges are an internal notion. Actors don't see the queues and don't know about them. Internally, the route 
+functions will
+publish messages to some queues and when a new actor connects, it will subscribe to one or two queues. 
+One exchange is created per (sub)endpoint. Queues exist at the 
+(sub)endpoint or actor level, depending on the flags used in the configuration of the endpoint.
+```javascript
+  endpoints: [ 
+    { name: 'endpoint', queue: QUEUEFLAG.endpoint },
+    { name: 'subendpoint', sub: [ 456, 457 ], queue: QUEUEFLAG.endpoint },
+    { name: 'actoronly', sub: [ 'subactor' ], queue: QUEUEFLAG.actor }, // QUEUEFLAG.actor is the default value
+    { name: 'endpointandactor', queue: QUEUEFLAG.endpoint | QUEUEFLAG.actor }
+  ]
+```
+With this configuration, the *smart-router* will listen to:
+* `/endpoint`
+* `/subendpoint/456`
+* `/subendpoint/457`
+* `/actoronly/subactor`
+* `/endpointandactor`
 
-Then the routing of the different events need to be registered:
+and will use the following queues:
+* `endpoint` of exchange `endpoint`
+* `subendpoint/456` of exchange `subendpoint/456`
+* `subendpoint/457` of exchange `subendpoint/457`
+* `<actorid>` of exchange `actoronly/subactor` where _actorid_ is the unique id of the actors connectiong to the end point
+* `endpointandactor` of exchange `endpointandactor`
+* `<actorid>` of exchange `endpointandactor` where _actorid_ is the unique id of the actors connectiong to the end point
 
-	router.register(agent456);
+During its transit inside the *smart-router*, a message will:
+1. be received on the endpoint
+2. routed using the corresponding route function 
+3. queued on the queue selected by the routing function
+4. dequeued and
+5. sent to an actor.
 
-With the function being something like:
+### High Availability
+Internally, the *smart-router* is composed of two modules:
+* a socket.io server written in node.js that handles the routing of the messages
+* a RabbitMQ cluster that handles the persistence and the publication of the messages.
+Any number of the node.js application can be deployed as long as they all connect to the same RabbitMQ cluster. A single message 
+can be queued by one instance and dequeued by another. As long as the RabbitMQ is correctly [set up](http://www.rabbitmq.com/clustering.html)
+to [mirror](http://www.rabbitmq.com/ha.html) the queues,
+there is no SPoF.
 
-	function register(endPoint) {
-	  routes.forEach(function (item) {
-		endPoint.on(item.event, item.routeAction);
-	  });
-	}
+Usage
+-----
 
-where routeAction is a function that takes the message and will give it 
-to the right exchanger.
-
-A message/event will have a type some metadata (at least some session ids) 
-and a payload. The payload has to be small, we will prefer to send several 
-messages instead of a big one.
-
-
-To start the prototype:
-
-	$ node lib/index.js &
-	$ node test/manual/wbh_test.js &
-	$ node test/manual/livechat_test.js &
-	$ node test/manual/ui_test.js &
-
-
-## Configuring and launching a smart-router - Writing actors
 ### Smart-router configuration
 
 On start, the smart-router will read a configuration object.
@@ -77,12 +123,12 @@ This configuration will contain:
     on which the smart-router will listen. Actors will connect on these endpoints.
     This object will be an array of objects containing the following properties:
     - `name` Endpoint's name.
-    - `ids` List containing endpoint's ids. This will determine on which namespaces the smart-router will listen: If
-        no ids are present, it will listen on `/name`. If ids are set, it will listen on `/name/id1`, `/name/id2`, ...
-    - `queue` A flag to determine the queue(s) which will be created for the endpoint. Use ('./lib/const/').QUEUEFLAG
+    - `sub` List containing endpoint's sub-endpoints. This will determine on which namespaces the smart-router will listen: If
+        no sub are present, it will listen on `/name`. If sub are set, it will listen on `/name/id1`, `/name/id2`, ...
+    - `queue` A flag to determine the queue(s) which will be created for the endpoint. Use ('./lib').const.QUEUEFLAG
         to set it. If there is no flag or if `QUEUEFLAG.actor` is set, smart-router will create a queue named
         with the actorId which has established a connection on the namespace.
-        If the flag `QUEUEFLAG.endpoint` is set, the smart-router will create a generic queue named `endpointName/endpointId`.
+        If the flag `QUEUEFLAG.endpoint` is set, the smart-router will create a generic queue named `endpointName/subendpoint`.
 - `routes` Array of configuration objects which will define actions to do for each type of message received on an endpoint.
     Each object will contains:
     - `endpoint` Endpoint's name (one of those defined in `endpoints` configuration).
@@ -92,12 +138,26 @@ This configuration will contain:
         you will do something like: `smartrouter.publish(queueId, 'messagetype', message)` which will publish a
         message of type `messagetype` to the queue `queueid`.
 
+### Handshake protocol
+If you develop your actors in JS, you only have to use the `Actor` class as describe in the next section.
+
+In any other language, you would need to use a [socket.io](http://socket.io/) client and to implement the
+handshake protocol:
+
+1. when a new Actor connects, the *smart-router* emits an empty `whoareyou` message.
+2. the Actor must respond with a `iam` message whose payload will be its unique id. These ids have to be unique 
+through out the whole platform.
+3. the *smart-router* responds then with a `hello` empty message.
+4. when receiving a message from an unknown Actor (unknown unique id), the *smart-router* will emit a `whoareyou` message 
+containing the previous message as a payload (`payload.type` being the message type, and `payload.message` the message body.)
+5. it is expected that the Actor then emits a `iam` with its id and re-emits the rejected message. 
+
 ### Writing actors
 
-All actors need to extend the raw Actor class defined in `lib/actor.js`.
+In JS, all actors need to extend the raw Actor class defined in `lib/actor.js`.
 
 ```javascript
-var Actor = require('lib/actor');
+var Actor = require('smart-router').Actor;
 
 MyActor = new JS.Class(Actor, {
 
@@ -127,26 +187,41 @@ Then, you are able to instantiate your actor:
 new MyActor('localhost:8080', 'endpoint', 'my_actor_id');
 ```
 
-### Running test configuration
 
-An example of basic smart-router configuration can be found in `config/index.js` (exported as `basic`).
-To run the smart-router with this basic configuration, simply do:
+### Examples
 
-```javascript
-var config = require('../config').basic;
-var smartrouter = require('./smartrouter.js').instance;
+#### Basic
+An example of basic actor can be found in `example/basic.js`.
+The scenario is very simple:
 
-smartrouter.on('started', function () {
-  console.log('SmartRouter started');
-});
+- Actor1 starts by sending a 'message' which will be published to the queue `actor/2` (subscribed by actor2).
+- The message is routed to actor2 which reply to the queue `actor/1/my_actor_id1` (subscribed by actor1)
+- The message is routed to actor1 which reply to the queue `actor/2/actor_id2` (subscribed by actor2)
+- ...
+It stops after two back and forth.
 
-smartrouter.start(config);
-```
+#### Tests
+The test folder contains different actors used to test the behaviour of the *smart-router*.
 
-An example of basic actor can be found in `test/mockactors/basicactor.js`.
-A test scenario can be launch with `node test/manual/basic_actors_test.js`. The scenario is very simple:
+1. `agent` is the main actor. It will decide of the flow of the messages by adding some metadata.
+2. `ui` simulates a UI. It can request to *talk* to the external `service`.
+3. `service` is an external service to which some messages can get routed.
 
-- Actor1 starts by making a 'talk' which will be published to the queue `actor2/33` (subscribed by actor2).
-- The message is routed to actor2 which reply to the queue `actor1/33/my_actor_id1` (subscribed by actor1)
-- The message is routed to actor1 which reply to the queue `actor2/33/actor_id2` (subscribed by actor2)
-- The message is routed to actor2 ...
+Use `npm test` from the command line to launch the tests.
+
+LICENSE
+=======
+
+Copyright 2012 VirtuOz, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

@@ -1,8 +1,8 @@
 {
   "name": "smart-router",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Callixte <ccauchois@virtuoz.com>",
-  "description": "an application routing messages/events between the different parts of our platform",
+  "description": "a message routing system that routes messages based on their content.",
   "main": "./lib/index",
   "repository": {
     "type": "git",
@@ -23,5 +23,9 @@
   },
   "engines": {
     "node": ">=0.6"
-  }
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+    "license": "Apache2"
 }
