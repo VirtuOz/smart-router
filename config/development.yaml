@@ -1,3 +1,7 @@
 log:
     level: 'trace'
     filename: 'smart-router.log'
+https:
+    use: false
+    pfx_path: 'path/to/pfx'
+    pfx_passphrase: 'passphrase'

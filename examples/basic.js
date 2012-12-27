@@ -75,8 +75,8 @@ var smartrouter = new SmartRouter();
 smartrouter.on('started', function () {
   console.log('SmartRouter started');
 
-  var actor1 = new BasicActor('localhost:8080', 'actor/1', 'my_actor_id1');
-  var actor2 = new BasicActor('localhost:8080', 'actor/2', 'actor_id2');
+  var actor1 = new BasicActor('http://localhost:8080', 'actor/1', 'my_actor_id1');
+  var actor2 = new BasicActor('http://localhost:8080', 'actor/2', 'actor_id2');
   actor1.connect();
   actor2.connect();
 
