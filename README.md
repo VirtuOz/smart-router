@@ -82,14 +82,14 @@ With this configuration, the *smart-router* will listen to:
 * `/endpoint`
 * `/subendpoint/456`
 * `/subendpoint/457`
-* `/actoronly/456`
+* `/actoronly/subactor`
 * `/endpointandactor`
 
 and will use the following queues:
 * `endpoint` of exchange `endpoint`
 * `subendpoint/456` of exchange `subendpoint/456`
 * `subendpoint/457` of exchange `subendpoint/457`
-* `<actorid>` of exchange `actoronly/456` where _actorid_ is the unique id of the actors connectiong to the end point
+* `<actorid>` of exchange `actoronly/subactor` where _actorid_ is the unique id of the actors connectiong to the end point
 * `endpointandactor` of exchange `endpointandactor`
 * `<actorid>` of exchange `endpointandactor` where _actorid_ is the unique id of the actors connectiong to the end point
 
