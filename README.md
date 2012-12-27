@@ -146,7 +146,7 @@ handshake protocol:
 
 1. when a new Actor connects, the *smart-router* emits an empty `whoareyou` message.
 2. the Actor must respond with a `iam` message whose payload will be its unique id. These ids have to be unique 
-through out the whole plateform.
+through out the whole platform.
 3. the *smart-router* responds then with a `hello` empty message.
 4. when receiving a message from an unknown Actor (unknown unique id), the *smart-router* will emit a `whoareyou` message 
 containing the previous message as a payload (`payload.type` being the message type, and `payload.message` the message body.)
@@ -207,7 +207,7 @@ The test folder contains different actors used to test the behaviour of the *sma
 2. `ui` simulates a UI. It can request to *talk* to the external `service`.
 3. `service` is an external service to which some messages can get routed.
 
-Use `mocha` from the command line to launch the tests.
+Use `npm test` from the command line to launch the tests.
 
 LICENSE
 =======
