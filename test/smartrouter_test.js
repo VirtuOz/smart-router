@@ -7,12 +7,13 @@ var io = require('socket.io-client');
 
 var logger = require('../util/logger');
 
-var smartrouter = require('../lib/smartrouter.js').instance;
-var config = require('../config').local;
-var Actor = require('../lib/actor');
-var Agent = require('./mockactors/wbh').Agent;
+var SRLib = require('../lib');
+var smartrouter = new SRLib.SmartRouter();
+var config = require('./testconfig').local;
+var Actor = SRLib.Actor;
+var Agent = require('./mockactors/agent').Agent;
 var UI = require('./mockactors/ui').UI;
-var LiveChat = require('./mockactors/livechat').LiveChat;
+var Service = require('./mockactors/service').Service;
 
 
 /* We instantiate the clients with the following params to be able to
@@ -95,16 +96,16 @@ describe('Smartrouter tests.', function()
     });
   });
 
-  it('sould connect a livechat to the smartrouter', function(done)
+  it('sould connect a service to the smartrouter', function(done)
   {
     logger.debug('*****************************************************');
-    logger.debug('STARTING TEST "connect a Livechat to the smartrouter"');
+    logger.debug('STARTING TEST "connect a service to the smartrouter"');
     logger.debug('*****************************************************');
     var mockedLiveChat = new LiveChat('http://localhost:8080', 'livechat/456', 'livechat456', clientsParams);
     mockedLiveChat.connect();
     // If we receive the hello callback, it means that we have correctly handshaked
     // and that the smartrouter has accepted us
-    mockedLiveChat.socket.once('hello', function()
+    mockedService.socket.once('hello', function()
     {
       done();
     });
@@ -168,33 +169,33 @@ describe('Smartrouter tests.', function()
     });
   });
 
-  it('should make a session request to the livechat', function(done)
+  it('should make a session request to the service', function(done)
   {
     logger.debug('*******************************************');
-    logger.debug('STARTING TEST "Requesting livechat session"');
+    logger.debug('STARTING TEST "Requesting service session"');
     logger.debug('*******************************************');
     var mockedAgent = new Agent('http://localhost:8080', 'agent/456', 'agent456', clientsParams);
     var mockedLiveChat = new LiveChat('http://localhost:8080', 'livechat/456', 'livechat456', clientsParams);
     var mockedUI = new UI('http://localhost:8080', 'ui/456', 'ui456', clientsParams);
     mockedAgent.connect();
-    mockedLiveChat.connect();
+    mockedservice.connect();
     mockedUI.connect();
 
-    mockedLiveChat.socket.once('sessionrequest', function()
+    mockedservice.socket.once('sessionrequest', function()
     {
       done();
     });
 
-    // MockedAgent is configured to send a 'sessionrequest' to the livechat when the UI says "livechat"
+    // MockedAgent is configured to send a 'sessionrequest' to the service when the UI says "service"
     mockedUI.socket.once('hello', function()
     {
-      mockedUI.talk('livechat');
+      mockedUI.talk('service');
     });
   });
 
-  it('Livechat will send a message to the ui', function(done) {
+  it('service will send a message to the ui', function(done) {
     logger.debug('********************************************');
-    logger.debug('STARTING TEST "Livechat will talk to the UI"');
+    logger.debug('STARTING TEST "service will talk to the UI"');
     logger.debug('********************************************');
     var mockedLiveChat;
     var mockedUI = new UI('http://localhost:8080', 'ui/456', 'ui456', clientsParams);
@@ -213,9 +214,9 @@ describe('Smartrouter tests.', function()
       mockedLiveChat.connect();
       mockedLiveChat.socket.once('hello', function()
       {
-        // Normally, Agent has previously sent a message containing the UI's id that the LiveChat has stored
-        mockedLiveChat.UI = mockedUI.actorid;
-        mockedLiveChat.talk('Hello, how can I help you?');
+        // Normally, Agent has previously sent a message containing the UI's id that the service has stored
+        mockedservice.UI = mockedUI.actorid;
+        mockedservice.talk('Hello, how can I help you?');
       });
     });
   });
