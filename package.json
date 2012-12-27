@@ -6,7 +6,7 @@
   "main": "./lib/index",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com:VirtuOz/smart-router.git"
+    "url": "https://github.com/VirtuOz/smart-router.git"
   },
   "dependencies" : {
     "jsclass":"3.0.9",
