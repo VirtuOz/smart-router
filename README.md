@@ -74,7 +74,7 @@ One exchange is created per (sub)endpoint. Queues exist at the
   endpoints: [ 
     { name: 'endpoint', queue: QUEUEFLAG.endpoint },
     { name: 'subendpoint', sub: [ 456, 457 ], queue: QUEUEFLAG.endpoint },
-    { name: 'actoronly', sub: [ 456 ], queue: QUEUEFLAG.actor }, // QUEUEFLAG.actor is the default value
+    { name: 'actoronly', sub: [ 'subactor' ], queue: QUEUEFLAG.actor }, // QUEUEFLAG.actor is the default value
     { name: 'endpointandactor', queue: QUEUEFLAG.endpoint | QUEUEFLAG.actor }
   ]
 ```
@@ -89,9 +89,9 @@ and will use the following queues:
 * `endpoint` of exchange `endpoint`
 * `subendpoint/456` of exchange `subendpoint/456`
 * `subendpoint/457` of exchange `subendpoint/457`
-* `_actorid_` of exchange `actoronly/456` where _actorid is the unique id of the actors connectiong to the end point
+* `<actorid>` of exchange `actoronly/456` where _<actorid>_ is the unique id of the actors connectiong to the end point
 * `endpointandactor` of exchange `endpointandactor`
-* `_actorid_` of exchange `endpointandactor` where _actorid is the unique id of the actors connectiong to the end point
+* `<actorid>` of exchange `endpointandactor` where _<actorid>_ is the unique id of the actors connectiong to the end point
 
 During its transit inside the *smart-router*, a message will:
 1. be received on the endpoint
