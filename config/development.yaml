@@ -5,3 +5,5 @@ https:
     use: false
     pfx_path: 'path/to/pfx'
     pfx_passphrase: 'passphrase'
+
+rabbitmq_reconnect_delay: 10000
