@@ -101,8 +101,8 @@ describe('Smartrouter tests.', function()
     logger.debug('*****************************************************');
     logger.debug('STARTING TEST "connect a service to the smartrouter"');
     logger.debug('*****************************************************');
-    var mockedLiveChat = new LiveChat('http://localhost:8080', 'livechat/456', 'livechat456', clientsParams);
-    mockedLiveChat.connect();
+    var mockedService = new Service('http://localhost:8080', 'service/456', 'service456', clientsParams);
+    mockedService.connect();
     // If we receive the hello callback, it means that we have correctly handshaked
     // and that the smartrouter has accepted us
     mockedService.socket.once('hello', function()
@@ -175,7 +175,7 @@ describe('Smartrouter tests.', function()
     logger.debug('STARTING TEST "Requesting service session"');
     logger.debug('*******************************************');
     var mockedAgent = new Agent('http://localhost:8080', 'agent/456', 'agent456', clientsParams);
-    var mockedLiveChat = new LiveChat('http://localhost:8080', 'livechat/456', 'livechat456', clientsParams);
+    var mockedservice = new Service('http://localhost:8080', 'service/456', 'service456', clientsParams);
     var mockedUI = new UI('http://localhost:8080', 'ui/456', 'ui456', clientsParams);
     mockedAgent.connect();
     mockedservice.connect();
@@ -197,7 +197,7 @@ describe('Smartrouter tests.', function()
     logger.debug('********************************************');
     logger.debug('STARTING TEST "service will talk to the UI"');
     logger.debug('********************************************');
-    var mockedLiveChat;
+    var mockedservice;
     var mockedUI = new UI('http://localhost:8080', 'ui/456', 'ui456', clientsParams);
     mockedUI.connect();
 
@@ -210,9 +210,9 @@ describe('Smartrouter tests.', function()
 
     mockedUI.socket.once('hello', function()
     {
-      mockedLiveChat = new LiveChat('http://localhost:8080', 'livechat/456', 'livechat456', clientsParams);
-      mockedLiveChat.connect();
-      mockedLiveChat.socket.once('hello', function()
+      mockedservice = new Service('http://localhost:8080', 'service/456', 'service456', clientsParams);
+      mockedservice.connect();
+      mockedservice.socket.once('hello', function()
       {
         // Normally, Agent has previously sent a message containing the UI's id that the service has stored
         mockedservice.UI = mockedUI.actorid;
