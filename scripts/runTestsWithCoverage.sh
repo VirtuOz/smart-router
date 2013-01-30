@@ -18,4 +18,4 @@ cp -r test target/coverage
 cp package.json target/coverage
 cp xunit-html-cov-config.json target/coverage
 
-XUNIT_HTML_COV_CONFIG=../../../xunit-html-cov-config.json target/coverage/node_modules/mocha/bin/_mocha target/coverage/test/*_test.js --ignore-leaks -t 20000 --reporter xunit-html-cov
+XUNIT_HTML_COV_CONFIG=../../../xunit-html-cov-config.json PORT=8889 target/coverage/node_modules/mocha/bin/_mocha target/coverage/test/*_test.js --ignore-leaks -t 20000 --reporter xunit-html-cov
