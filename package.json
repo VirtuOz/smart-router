@@ -26,7 +26,7 @@
     "node": ">=0.6"
   },
   "scripts": {
-      "test":"mocha --ignore-leaks -R spec -t 30000 --ui bdd",
+      "test":"PORT=8889 mocha --ignore-leaks -R spec -t 30000 --ui bdd",
       "test-coverage":"scripts/runTestsWithCoverage.sh",
       "clean":"rm -rf target"
   },
