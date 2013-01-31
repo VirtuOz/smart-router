@@ -427,5 +427,52 @@ describe('Smartrouter tests.', function()
                                                                           });
                                          });
         });
+
+        it('should have an error as the endPoint is not known in the config', function(done)
+        {
+            var socket = io.connect('http://localhost:' + config.port.toString());
+            var errorExpected = '[toto] is not a valid Endpoint.';
+            //Let's try to register an unknown endpoint
+            socket.once('connect', function() {
+                // Now call the Nagios check method.
+                socket.once('endpointRegistrationError', function(err) {
+                    assert.deepEqual(err, new Error(errorExpected));
+                    smartrouter.nagiosCheck(function(err, nagiosEvents)
+                        {
+                            assert.isUndefined(err);
+                            assert.isTrue(Array.isArray(nagiosEvents));
+                            assert.equal(nagiosEvents.length, 1);
+                            console.log(JSON.stringify(nagiosEvents[0]));
+                            assert.deepEqual(nagiosEvents[0], new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "EventsController", errorExpected));
+                            done();
+                        });
+                });
+                socket.emit('registerNewEndpointId', { name: 'toto', id: 458 });
+            });
+        });
+
+        it('should have a warning as the endpoint is already known', function(done)
+        {
+            var socket = io.connect('http://localhost:' + config.port.toString());
+            var warnExpected = 'Endpoint [/agent/456] already exists. Aborted.';
+            //Let's try to register an unknown endpoint
+            socket.once('connect', function() {
+                // Now call the Nagios check method.
+                socket.once('endpointRegistered', function(err) {
+                    assert.deepEqual(err, new Error(warnExpected));
+                    smartrouter.nagiosCheck(
+                            function(err, nagiosEvents)
+                                {
+                                    assert.isUndefined(err);
+                                    assert.isTrue(Array.isArray(nagiosEvents));
+                                    assert.equal(nagiosEvents.length, 1);
+                                    console.log(JSON.stringify(nagiosEvents[0]));
+                                    assert.deepEqual(nagiosEvents[0], new NagiosCheckResponse(NagiosCheckResponseCodes.WARNING, "EventsController", warnExpected));
+                                    done();
+                                });
+                });
+                socket.emit('registerNewEndpointId', { name: 'agent', id: 456 });
+            });
+        });
     });
 });
