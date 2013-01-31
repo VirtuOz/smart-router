@@ -1,4 +1,4 @@
-smart-router
+smart-router [![Build Status](https://travis-ci.org/VirtuOz/smart-router.png)](https://travis-ci.org/VirtuOz/smart-router)
 ============
 
 The *smart-router* is a message routing system that routes messages based on their content. 
