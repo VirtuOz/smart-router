@@ -14,7 +14,8 @@ var Actor = SRLib.Actor;
 var Agent = require('./mockactors/agent').Agent;
 var UI = require('./mockactors/ui').UI;
 var Service = require('./mockactors/service').Service;
-
+var NagiosCheckResponse = require('nagios').NagiosCheckResponse;
+var NagiosCheckResponseCodes = require('nagios').NagiosCheckResponseCodes;
 
 /* We instantiate the clients with the following params to be able to
  * properly shutdown the smart-router between tests.
@@ -324,4 +325,107 @@ describe('Smartrouter tests.', function()
       handshakedBeforeRegistration = true;
     });
   });
+
+    describe('nagios responses', function()
+    {
+        it ('should return a single OK event', function(done)
+        {
+            //First call to get rid of any error message from other test.
+            smartrouter.nagiosCheck(function(){});
+            smartrouter.nagiosCheck(function(err, nagiosEvents)
+                                         {
+                                             assert.isUndefined(err);
+                                             assert.isTrue(Array.isArray(nagiosEvents));
+                                             assert.equal(nagiosEvents.length, 1);
+                                             assert.deepEqual(JSON.stringify(nagiosEvents[0]),
+                                                              JSON.stringify(new NagiosCheckResponse(NagiosCheckResponseCodes.OK, "EventsController", "0 OK 0:1")));
+                                             done();
+                                         });
+        });
+
+        it ('should return a single error event', function(done)
+        {
+            // Simulate the logging of an event.
+            var simulatedEvent = new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "Wibble", "Giblets");
+            smartrouter._storeNagiosEvent(simulatedEvent);
+
+            // Now call the Nagios check method.
+            smartrouter.nagiosCheck(function(err, nagiosEvents)
+                                         {
+                                             assert.isUndefined(err);
+                                             assert.isTrue(Array.isArray(nagiosEvents));
+                                             assert.equal(nagiosEvents.length, 1);
+                                             assert.deepEqual(nagiosEvents[0], simulatedEvent);
+                                             done();
+                                         });
+        });
+
+        it ('should return multiple events', function(done)
+        {
+            // Simulate the logging of an event.
+            var simulatedErrorEvent = new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "ERROR", "ERROR");
+            var simulatedWarningEvent = new NagiosCheckResponse(NagiosCheckResponseCodes.WARNING, "WARNING", "WARNING");
+            var simulatedOKEvent = new NagiosCheckResponse(NagiosCheckResponseCodes.OK, "OK", "OK");
+            smartrouter._storeNagiosEvent(simulatedErrorEvent);
+            smartrouter._storeNagiosEvent(simulatedWarningEvent);
+            smartrouter._storeNagiosEvent(simulatedOKEvent);
+
+            // Now call the Nagios check method.
+            smartrouter.nagiosCheck(function(err, nagiosEvents)
+                                         {
+                                             assert.isUndefined(err);
+                                             assert.isTrue(Array.isArray(nagiosEvents));
+                                             assert.equal(nagiosEvents.length, 3);
+                                             assert.deepEqual(nagiosEvents[0], simulatedErrorEvent);
+                                             assert.deepEqual(nagiosEvents[1], simulatedWarningEvent);
+                                             assert.deepEqual(nagiosEvents[2], simulatedOKEvent);
+                                             done();
+                                         });
+        });
+
+        it ('should limit the number of events stored', function(done)
+        {
+            // We log 100 events.  That's the default number to store.  We should get 100 events back from the
+            // Nagios check.
+            for(var i = 0; i < 100; i++)
+            {
+                smartrouter._storeNagiosEvent(new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "ERROR-" + i, "ERROR-" + i));
+            }
+
+            // Now call the Nagios check method.
+            smartrouter.nagiosCheck(function(err, nagiosEvents)
+                                         {
+                                             assert.isUndefined(err);
+                                             assert.isTrue(Array.isArray(nagiosEvents));
+                                             assert.equal(nagiosEvents.length, 100);
+
+                                             // Make sure everything was stored properly.
+                                             for(var i = 0; i < 100; i++)
+                                             {
+                                                 assert.deepEqual(nagiosEvents[i], new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "ERROR-" + i, "ERROR-" + i));
+                                             }
+
+                                             // Now store 101 events.  This time the first one will be dropped because it's the oldest.
+                                             for(i = 0; i < 101; i++)
+                                             {
+                                                 smartrouter._storeNagiosEvent(new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "ERROR-" + i, "ERROR-" + i));
+                                             }
+
+                                             smartrouter.nagiosCheck(function(err, nagiosEvents)
+                                                                          {
+                                                                              assert.isUndefined(err);
+                                                                              assert.isTrue(Array.isArray(nagiosEvents));
+                                                                              assert.equal(nagiosEvents.length, 100);
+
+                                                                              // Make sure everything was stored properly.
+                                                                              for(var i = 0; i < 100; i++)
+                                                                              {
+                                                                                  assert.deepEqual(nagiosEvents[i], new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "ERROR-" + (i + 1), "ERROR-" + (i + 1)));
+                                                                              }
+
+                                                                              done();
+                                                                          });
+                                         });
+        });
+    });
 });
