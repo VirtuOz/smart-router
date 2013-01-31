@@ -14,7 +14,8 @@
     "socket.io":"0.9",
     "socket.io-client":"0.9",
     "winston":"0.6.2",
-    "config":"0.4.17"
+    "config":"0.4.17",
+    "nagios":"1.0.0"
   },
   "devDependencies":{
     "mocha":"1.7.0",
