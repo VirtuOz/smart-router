@@ -1,6 +1,8 @@
 log:
     level: 'trace'
     filename: 'smart-router.log'
+nagios:
+    maximumNumberOfEventsToKeep: 100
 https:
     use: false
     pfx_path: 'path/to/pfx'
