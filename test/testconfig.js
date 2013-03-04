@@ -29,27 +29,27 @@ exports.local =
     { endpoint: 'ui', messagetype: 'talk',
       action: function (message, socket, smartrouter) {  
         if (message.ids.service && message.metadata.service) {
-          smartrouter.publish(message.ids.service, 'talk', message);
-          smartrouter.publish(message.ids.agent, 'log', message);
+          smartrouter.publish(message.ids.service, 'talk', message, socket);
+          smartrouter.publish(message.ids.agent, 'log', message, socket);
         } 
         else {
-          smartrouter.publish(message.ids.agent, 'talk', message); 
+          smartrouter.publish(message.ids.agent, 'talk', message, socket);
         }
       }
     },
     { endpoint: 'agent', messagetype: 'talkback', // when we receive a 'talkback' message on the 'agent' endpoint (ie. from the agent),
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
+        smartrouter.publish(message.ids.ui, 'talkback', message, socket); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
     { endpoint: 'service', messagetype: 'talkback', // when we receive a 'talkback' message on the 'service' endpoint (ie. from the service),
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.ui, 'talkback', message); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
+        smartrouter.publish(message.ids.ui, 'talkback', message, socket); // we publish it to the message.ids.ui queue (ie. to the corresponding ui)
       }
     },
     { endpoint: 'agent', messagetype: 'sessionrequest',
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.service, 'sessionrequest', message);
+        smartrouter.publish(message.ids.service, 'sessionrequest', message, socket);
       }
     }
 

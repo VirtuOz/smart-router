@@ -60,12 +60,12 @@ var basicconfig = {
   routes: [
     { endpoint: '*', messagetype: 'echo', // received on any endpoint
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.default, 'echo', message);
+        smartrouter.publish(message.ids.default, 'echo', message, socket);
       }
     },
     { endpoint: 'actor', messagetype: 'message', // when we receive a 'message' message on the 'actor1' endpoint (ie. from the actor1),
       action: function (message, socket, smartrouter) {
-        smartrouter.publish(message.ids.addressee, 'message', message); // we publish it to the message.ids.addressee queue (ie. to actor2)
+        smartrouter.publish(message.ids.addressee, 'message', message, socket); // we publish it to the message.ids.addressee queue (ie. to actor2)
       }
     }
   ]
