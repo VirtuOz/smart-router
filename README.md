@@ -27,7 +27,7 @@ endpoint.
 Messages are exchanged by the Actors through the *smart-router*. It will then introspect them to route them to the 
 right actor or to the right endpoint for one actor to pick them up.
 
-A message has a type and a body which can be repesented like that:
+A message has a type and a body which can be represented like that:
 ```javascript
 { 
   ids: { },
@@ -42,11 +42,11 @@ specific data, whereas **metadata** will contain data used by the routing. (The 
 
 ### Routes
 A Route is a function that is called when the *smart-router* receives a message of a specific type on a specific end point.
-In this function, the *smart-router* can look at the endpoint, the message type and the message body to define wht to do 
+In this function, the *smart-router* can look at the endpoint, the message type and the message body to define what to do
 with it. Usually, it will publish it as-is to another and point or actor, but it can modify it, fork it and publish it to 
 several endpoints.
 In the following route, when we receive a message of type **business** from the **serviceA** endpoint, we check if it is
-important. If it is, we route it to **serviceC** enpoint as an **important** message and log it by sending it to the logger
+important. If it is, we route it to **serviceC** endpoint as an **important** message and log it by sending it to the logger
 as a **log** message. If not, we forward it as-is to **serviceB**.
 ```javascript
 { 
@@ -54,15 +54,15 @@ as a **log** message. If not, we forward it as-is to **serviceB**.
   messagetype: 'business',
   action: function (message, socket, smartrouter) {  
     if (message.ids.serviceC && message.metadata.isImportant) {
-      smartrouter.publish(message.ids.serviceC, 'important', message);
-      smartrouter.publish(message.ids.logger, 'log', message);
+      smartrouter.publish(message.ids.serviceC, 'important', message, socket);
+      smartrouter.publish(message.ids.logger, 'log', message, socket);
     } 
     else {
-      smartrouter.publish(message.ids.serviceB, 'business', message); 
+      smartrouter.publish(message.ids.serviceB, 'business', message, socket);
     }
   }
 }
-``` 
+```
 
 ### Queues and Exchanges
 Queues and Exchanges are an internal notion. Actors don't see the queues and don't know about them. Internally, the route 
@@ -89,9 +89,9 @@ and will use the following queues:
 * `endpoint` of exchange `endpoint`
 * `subendpoint/456` of exchange `subendpoint/456`
 * `subendpoint/457` of exchange `subendpoint/457`
-* `<actorid>` of exchange `actoronly/subactor` where _actorid_ is the unique id of the actors connectiong to the end point
+* `<actorid>` of exchange `actoronly/subactor` where _actorid_ is the unique id of the actors connecting to the end point
 * `endpointandactor` of exchange `endpointandactor`
-* `<actorid>` of exchange `endpointandactor` where _actorid_ is the unique id of the actors connectiong to the end point
+* `<actorid>` of exchange `endpointandactor` where _actorid_ is the unique id of the actors connecting to the end point
 
 During its transit inside the *smart-router*, a message will:
 1. be received on the endpoint
@@ -135,8 +135,12 @@ This configuration will contain:
     - `messagetype` The name of the event that the smart-router will listen for.
     - `action: function(message, socket, smartrouter)` A function which will be called once we receive the event
         `messagetype` on the `endpoint`. **It's here that you need to route the received message.** Typically,
-        you will do something like: `smartrouter.publish(queueId, 'messagetype', message)` which will publish a
+        you will do something like: `smartrouter.publish(queueId, 'messagetype', message, socket)` which will publish a
         message of type `messagetype` to the queue `queueid`.
+        The `socket` argument is the actual socket where your actor is connected. By passing it as an argument of the
+        `publish()` method of the smart-router, the smart-router will be able to send back to your actor the errors which
+        might occur while publishing the message on RabbitMQ (Typically: The queue where your actor is trying to publish
+        does not exist).
 
 ### Handshake protocol
 If you develop your actors in JS, you only have to use the `Actor` class as describe in the next section.
