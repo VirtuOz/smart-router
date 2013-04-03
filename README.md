@@ -94,11 +94,20 @@ and will use the following queues:
 * `<actorid>` of exchange `endpointandactor` where _actorid_ is the unique id of the actors connecting to the end point
 
 During its transit inside the *smart-router*, a message will:
+
 1. be received on the endpoint
 2. routed using the corresponding route function 
 3. queued on the queue selected by the routing function
 4. dequeued and
 5. sent to an actor.
+
+#### Queue cleaning
+
+The smart-router will automatically destroy RabbitMQ queues when no actor has connected to it for some time.
+The queues will only be deleted for endpoints which are declared as ```QUEUEFLAG.actor``` only. Queue belonging to
+endpoints declared as ```QUEUEFLAG.endpoint``` will never be deleted.
+By default, an actor's queue will be deleted 15 minutes after the last actor has been disconnected from it.
+This value configurable in the yaml properties file.
 
 ### High Availability
 Internally, the *smart-router* is composed of two modules:
