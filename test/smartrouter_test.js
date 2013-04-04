@@ -320,49 +320,6 @@ describe('Smartrouter tests.', function ()
     });
   });
 
-  it('should set client queue as markedForDeletion after client disconnect', function (done)
-  {
-    logger.debug('********************************************************************');
-    logger.debug('STARTING TEST "Mark actor queues for deletion after they disconnect"');
-    logger.debug('********************************************************************');
-    var mockedAgent = new Agent('http://localhost:' + config.port.toString(), 'agent/456', 'agent456', clientsParams);
-    var mockedUI = new UI('http://localhost:' + config.port.toString(), 'ui/456', 'ui456', clientsParams);
-    mockedAgent.connect();
-    mockedUI.connect();
-    mockedUI.socket.once('disconnect', function () // clients are disconnected automatically after 200ms
-    {
-      // We wait 200ms to be sure we have unsubscribed from RabbitMQ and we test which queue is marked for deletion.
-      setTimeout(function() {
-        console.log(smartrouter._queuesMarkedForDeletion);
-        assert.isDefined(smartrouter._queuesMarkedForDeletion['ui/456/ui456']);
-        assert.isUndefined(smartrouter._queuesMarkedForDeletion['agent/456/agent456']); // Endpoints queues are not deleted.
-        done();
-      }, 200);
-    });
-  });
-
-  it('should delete a queue in RabbitMQ', function (done)
-  {
-    logger.debug('******************************************');
-    logger.debug('STARTING TEST "Delete a Queue in RabbitMQ"');
-    logger.debug('******************************************');
-    var queueName = 'test_queue';
-    smartrouter.amqp.queue(queueName, { autoDelete: false, closeChannelOnUnsubscribe: true }, function (q) {
-    })
-    .on('open', function() {
-      smartrouter.queueDestroy(queueName);
-      // Wait 200ms and check if the queue is correctly deleted in RabbitMQ using a passive queue.
-      setTimeout(function() {
-        smartrouter.amqp.queue(queueName, { passive: true }, function(q) {
-        })
-        .on('error', function() {
-          logger.debug('Queue ' + queueName + ' does not exists anymore');
-          done();
-        });
-      }, 200);
-    });
-  });
-
   describe('nagios responses', function ()
   {
     it('should return a single OK event', function (done)
