@@ -103,8 +103,8 @@ During its transit inside the *smart-router*, a message will:
 
 #### Queue cleaning
 
-The smart-router will create queues which are only defined at actor level with 'x-expires' argument.
-By default, an actor's queue will be deleted 15 minutes after the last actor has been disconnected from it.
+The smart-router will create queues with 'x-expires' argument.
+By default, a queue will be deleted 15 minutes after the last actor has been disconnected from it.
 This value configurable in the yaml properties file.
 
 ### High Availability
