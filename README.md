@@ -94,11 +94,18 @@ and will use the following queues:
 * `<actorid>` of exchange `endpointandactor` where _actorid_ is the unique id of the actors connecting to the end point
 
 During its transit inside the *smart-router*, a message will:
+
 1. be received on the endpoint
 2. routed using the corresponding route function 
 3. queued on the queue selected by the routing function
 4. dequeued and
 5. sent to an actor.
+
+#### Queue cleaning
+
+The smart-router will create queues with 'x-expires' argument.
+By default, a queue will be deleted 15 minutes after the last actor has been disconnected from it.
+This value configurable in the yaml properties file.
 
 ### High Availability
 Internally, the *smart-router* is composed of two modules:
