@@ -103,9 +103,7 @@ During its transit inside the *smart-router*, a message will:
 
 #### Queue cleaning
 
-The smart-router will automatically destroy RabbitMQ queues when no actor has connected to it for some time.
-The queues will only be deleted for endpoints which are declared as ```QUEUEFLAG.actor``` only. Queue belonging to
-endpoints declared as ```QUEUEFLAG.endpoint``` will never be deleted.
+The smart-router will create queues which are only defined at actor level with 'x-expires' argument.
 By default, an actor's queue will be deleted 15 minutes after the last actor has been disconnected from it.
 This value configurable in the yaml properties file.
 
