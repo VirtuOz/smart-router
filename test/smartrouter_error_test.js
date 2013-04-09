@@ -34,7 +34,7 @@ describe('SmartRouter Error cases', function ()
              });
   afterEach(function (done)
             {
-              CONFIG.rabbitmq_reconnect_delay = 10000;
+              CONFIG.rabbitmqReconnectDelay = 10000;
               utils.stopSmartRouter(logger, smartrouter, done);
             });
 
@@ -146,7 +146,7 @@ describe('SmartRouter Error cases', function ()
       var myConfig = JSON.parse(JSON.stringify(smConfig));
       myConfig.amqp =  { url: 'amqp://mynock.toto.fr' };
       //We change this to not wait 3 plombes
-      CONFIG.rabbitmq_reconnect_delay = 100;
+      CONFIG.rabbitmqReconnectDelay = 100;
       correctSmartRouter.start(myConfig);
       //Now let's set the correct url
       correctSmartRouter.amqp.setOptions(smConfig.amqp);
