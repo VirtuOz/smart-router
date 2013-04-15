@@ -94,11 +94,11 @@ describe('SmartRouter Error cases', function ()
     it('RabbitMQ connection error correctly handle', function (done)
     {
       var smartrouterThatWillFailed = new SRLib.SmartRouter();
-      var error_msg_expected = 'Error while connecting to RabbitMQ: Error: getaddrinfo ENOENT. Will try to reconnect in 10000';
+      var error_msg_expected = /Error while connecting to RabbitMQ: Error: getaddrinfo (ENOENT|ENOTFOUND). Will try to reconnect in 10000/;
       smartrouterThatWillFailed.once('amqpError', function (err)
       {
         console.log(err.message);
-        assert.equal(err.message, error_msg_expected);
+        assert.match(err.message, error_msg_expected);
         //We need to check nagios here.
         smartrouterThatWillFailed.nagiosCheck(
             function (err, nagiosEvents)
@@ -107,7 +107,9 @@ describe('SmartRouter Error cases', function ()
               assert.isTrue(Array.isArray(nagiosEvents));
               assert.equal(nagiosEvents.length, 1);
               console.log(JSON.stringify(nagiosEvents[0]));
-              assert.deepEqual(nagiosEvents[0], new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "EventsController", error_msg_expected));
+                assert.equal(nagiosEvents[0].code, NagiosCheckResponseCodes.ERROR);
+                assert.equal(nagiosEvents[0].subSystemName, "EventsController");
+                assert.match(nagiosEvents[0].description, error_msg_expected);
               //We check that we correctly received the event error for the first error.
               done();
             });
@@ -121,11 +123,11 @@ describe('SmartRouter Error cases', function ()
     {
       var correctSmartRouter = new SRLib.SmartRouter();
       var error_has_occured = false;
-      var error_msg_expected = 'Error while connecting to RabbitMQ: Error: getaddrinfo ENOENT. Will try to reconnect in 100';
+      var error_msg_expected = /^Error while connecting to RabbitMQ: Error: getaddrinfo (ENOENT|ENOTFOUND). Will try to reconnect in 100/;
       correctSmartRouter.once('amqpError', function (err)
       {
         console.log(err.message);
-        assert.equal(err.message, error_msg_expected);
+        assert.match(err.message, error_msg_expected);
         error_has_occured = true;
       });
       correctSmartRouter.once('started', function ()
@@ -138,7 +140,9 @@ describe('SmartRouter Error cases', function ()
               assert.isTrue(Array.isArray(nagiosEvents));
               assert.equal(nagiosEvents.length, 1);
               console.log(JSON.stringify(nagiosEvents[0]));
-              assert.deepEqual(nagiosEvents[0], new NagiosCheckResponse(NagiosCheckResponseCodes.ERROR, "EventsController", error_msg_expected));
+              assert.equal(nagiosEvents[0].code, NagiosCheckResponseCodes.ERROR);
+              assert.equal(nagiosEvents[0].subSystemName, "EventsController");
+              assert.match(nagiosEvents[0].description, error_msg_expected);
               //We check that we correctly received the event error for the first error.
               done(error_has_occured ? undefined : new Error('Never called the error'));
             });
