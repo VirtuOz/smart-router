@@ -94,7 +94,7 @@ describe('SmartRouter Error cases', function ()
     it('RabbitMQ connection error correctly handle', function (done)
     {
       var smartrouterThatWillFailed = new SRLib.SmartRouter();
-      var error_msg_expected = 'Error while connecting to RabbitMQ: Error: getaddrinfo ENOTFOUND. Will try to reconnect in 10000';
+      var error_msg_expected = 'Error while connecting to RabbitMQ: Error: getaddrinfo ENOENT. Will try to reconnect in 10000';
       smartrouterThatWillFailed.once('amqpError', function (err)
       {
         console.log(err.message);
@@ -121,7 +121,7 @@ describe('SmartRouter Error cases', function ()
     {
       var correctSmartRouter = new SRLib.SmartRouter();
       var error_has_occured = false;
-      var error_msg_expected = 'Error while connecting to RabbitMQ: Error: getaddrinfo ENOTFOUND. Will try to reconnect in 100';
+      var error_msg_expected = 'Error while connecting to RabbitMQ: Error: getaddrinfo ENOENT. Will try to reconnect in 100';
       correctSmartRouter.once('amqpError', function (err)
       {
         console.log(err.message);
