@@ -38,24 +38,31 @@ var customLevels = {
   }
 };
 
-var logger = winston.loggers.add('logger', {
-  transports: [
-    new (winston.transports.Console)(
-        {
-          level: CONFIG.level,
-          colorize: tty.isatty(process.stdout.fd),
-          json: false,
-          timestamp: true
-        }
-    ),
-    new (winston.transports.File)(
-        {
-          level: CONFIG.level,
-          filename: CONFIG.filename,
-          json: false
-        })
-  ]
-});
+console.log("Enabled loggers: Console=" + CONFIG.consoleLogger + ", File=" + CONFIG.fileLogger);
+var transports = [];
+if (CONFIG.consoleLogger) {
+  transports.push(new (winston.transports.Console)(
+    {
+      level: CONFIG.level,
+      colorize: tty.isatty(process.stdout.fd),
+      json: false,
+      timestamp: true
+    }
+  ));
+}
+if (CONFIG.fileLogger) {
+  transports.push(new (winston.transports.File)(
+    {
+      level: CONFIG.level,
+      filename: CONFIG.filename,
+      json: false,
+      maxsize:CONFIG.maxSize,
+      maxFiles:CONFIG.maxFiles
+    }
+  ));
+}
+
+var logger = winston.loggers.add('logger', { transports: transports });
 
 logger.setLevels(customLevels.levels);
 winston.addColors(customLevels.colors);
