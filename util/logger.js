@@ -17,7 +17,7 @@
 
 var winston = require('winston'),
     tty = require('tty'),
-    CONFIG = require('config').log;
+    CONFIG = require('config');
 
 // Custom levels and color, more similar to log4j
 // Default level are in npm-config, with DEBUG after INFO, weird
@@ -38,26 +38,26 @@ var customLevels = {
   }
 };
 
-console.log("Enabled loggers: Console=" + CONFIG.consoleLogger + ", File=" + CONFIG.fileLogger);
+console.log("Enabled loggers: Console=" + CONFIG.log.consoleLogger + ", File=" + CONFIG.log.fileLogger);
 var transports = [];
-if (CONFIG.consoleLogger) {
+if (CONFIG.log.consoleLogger) {
   transports.push(new (winston.transports.Console)(
     {
-      level: CONFIG.level,
+      level: CONFIG.log.level,
       colorize: tty.isatty(process.stdout.fd),
       json: false,
       timestamp: true
     }
   ));
 }
-if (CONFIG.fileLogger) {
+if (CONFIG.log.fileLogger) {
   transports.push(new (winston.transports.File)(
     {
-      level: CONFIG.level,
-      filename: CONFIG.filename,
+      level: CONFIG.log.level,
+      filename: CONFIG.log.filename,
       json: false,
-      maxsize:CONFIG.maxSize,
-      maxFiles:CONFIG.maxFiles
+      maxsize:CONFIG.log.maxSize,
+      maxFiles:CONFIG.log.maxFiles
     }
   ));
 }
