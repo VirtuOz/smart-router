@@ -282,6 +282,76 @@ describe('Smartrouter tests.', function ()
     });
   });
 
+  it('should create multiple connection once there is too many channels', function(done) {
+    logger.debug('************************************************************');
+    logger.debug('STARTING TEST "SmartRouter will create multiple connections"');
+    logger.debug('************************************************************');
+    smartrouter.MAX_CHANNEL_PER_CONNECTION = 4;
+    var mockedAgent = new Agent('http://localhost:' + config.port.toString(), 'agent/456', 'agent456', clientsParams);
+    var mockedUI = new UI('http://localhost:' + config.port.toString(), 'ui/456', 'ui456', clientsParams);
+    mockedAgent.connect();
+    mockedUI.connect();
+    mockedUI.socket.once('hello', function ()
+    {
+      // At this point the 1st connection has 3 channels (the 3 queues): agent/456/agent456, agent/456, ui/456/ui456
+      assert.equal(3, smartrouter.amqp.channelCounter);
+      setTimeout(function () {
+        // This message will create a 4th, so smart-router will create a new connection.
+        // (and actually a 5th also, which correspond the default exchange)
+        mockedUI.talk('This message will create a channel');
+      }, 50);
+    });
+
+    mockedAgent.socket.once('talk', function (data)
+    {
+      assert.equal(2, smartrouter.amqpConnections.length, "Number of connection after first talk received from UI");
+      assert.equal(0, smartrouter.amqp.channelCounter, "Number of channels on 2nd Connection");
+      assert.equal('This message will create a channel', data.payload.text);
+      // This 'talk' event will trigger a response from the agent, which will open 2 channels
+      // on the 2nd connection (the queue + the default exchange)
+    });
+
+    mockedUI.socket.once('talkback', function ()
+    {
+      assert.equal(2, smartrouter.amqp.channelCounter, "channelCounter of 2nd Connection after receiving talkback from agent");
+      // After the agent response, we talk again: 1 new channel for this message +
+      // another for the agent response = 4 channels on the 2nd connection -> new Channel
+      mockedUI.talk('This message will create another channel');
+
+      mockedUI.socket.once('talkback', function(data) {
+        assert.equal(3, smartrouter.amqpConnections.length, "Number of connection after second talk finished");
+        for (var i = 0; i < smartrouter.amqpConnections.length; ++i) {
+          logger.debug('Queues for connection ' + i + ': ' + Object.keys(smartrouter.amqpConnections[i].queues));
+        }
+
+        // We disconnect the firsts clients so that all queues are deleted from the 1st connection and 2nd connection.
+        // In practice, only the 1st connection is cleaned, I don't know why. Certainly because we are in a single process.
+        // Works fine with real clients.
+        mockedUI.socket.disconnect();
+        mockedAgent.socket.disconnect();
+        // We connect new clients. It will create 3 queues on the 3rd connection
+        var mockedAgent_2 = new Agent('http://localhost:' + config.port.toString(), 'agent/456', 'agent456', clientsParams);
+        var mockedUI_2 = new UI('http://localhost:' + config.port.toString(), 'ui/456', 'ui456', clientsParams);
+        mockedAgent_2.connect();
+        mockedUI_2.connect();
+        setTimeout(function () {
+          for (var i = 0; i < smartrouter.amqpConnections.length; ++i) {
+            logger.debug('Queues for connection ' + i + ': ' + Object.keys(smartrouter.amqpConnections[i].queues));
+          }
+
+          // We talk to create new channels on the 3rd connection and make the smart-router create a new one.
+          // It will also clean the empty connections (so the 1st)
+          mockedUI_2.talk('Another talk from another UI');
+          mockedUI_2.socket.once('talkback', function(data) {
+            // Agent has replied. In the meantime, smart-router has cleaned the empty connection.
+            assert.equal(3, smartrouter.amqpConnections.length, "Number of connection at the end");
+            done();
+          });
+        }, 100);
+      });
+    });
+  });
+
   // We will try to connect on an undefined endpoint (/agent/458).
   // As it is not registered, we will not receive the handshake and will be disconnected (timeout = 200ms).
   // Then we send a 'registerNewEndpointId' for /agent/458, and we try again to connect.
