@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "jsclass": "3.0.9",
-    "amqp": "git+ssh://git@github.com:VirtuOz/node-amqp.git#fixReconnectAndPassiveQueues",
+    "amqp": "git+https://github.com/VirtuOz/node-amqp.git#fixReconnectAndPassiveQueues",
     "socket.io": "0.9",
     "socket.io-client": "0.9",
     "winston": "0.6.2",
