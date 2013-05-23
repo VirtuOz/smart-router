@@ -1,7 +1,7 @@
 log:
     level: 'trace'
-    consoleLogger: false
-    fileLogger: true
+    consoleLogger: true
+    fileLogger: false
     filename: 'smart-router.log'
     maxSize: 50000000
     maxFiles: 10
