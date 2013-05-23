@@ -14,3 +14,4 @@ https:
 
 rabbitmqReconnectDelay: 10000
 delayBeforeDeletingInactiveQueue: 900000
+maxChannelPerConnection: 64000
