@@ -1,6 +1,10 @@
 log:
     level: 'trace'
+    consoleLogger: false
+    fileLogger: true
     filename: 'smart-router.log'
+    maxSize: 50000000
+    maxFiles: 10
 nagios:
     maximumNumberOfEventsToKeep: 100
 https:
