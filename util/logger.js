@@ -38,6 +38,10 @@ var customLevels = {
   }
 };
 
+if (!CONFIG.log) {
+  console.warn("CONFIG.log properties are not defined, activating console by default (level will be INFO).");
+  CONFIG.log = { consoleLogger: true, fileLogger: false };
+}
 console.log("Enabled loggers: Console=" + CONFIG.log.consoleLogger + ", File=" + CONFIG.log.fileLogger);
 var transports = [];
 if (CONFIG.log.consoleLogger) {
