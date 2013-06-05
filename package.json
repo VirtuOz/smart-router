@@ -1,6 +1,6 @@
 {
   "name": "smart-router",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "Callixte <ccauchois@virtuoz.com>",
   "description": "a message routing system that routes messages based on their content.",
   "main": "./lib/index",
