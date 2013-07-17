@@ -2,6 +2,16 @@
   "name": "smart-router",
   "version": "0.2.2",
   "author": "Callixte <ccauchois@virtuoz.com>",
+  "contributors":[
+    {
+        "name":"Olivier Vaussy",
+        "email":"olivier.vaussy@nuance.com"
+    },
+    {
+        "name":"Sylvain Bellone",
+        "email":"sylvain.bellone@nuance.com"
+    }
+  ],
   "description": "a message routing system that routes messages based on their content.",
   "main": "./lib/index",
   "repository": {
