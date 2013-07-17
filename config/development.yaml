@@ -1,6 +1,10 @@
 log:
     level: 'trace'
+    consoleLogger: true
+    fileLogger: false
     filename: 'smart-router.log'
+    maxSize: 50000000
+    maxFiles: 10
 nagios:
     maximumNumberOfEventsToKeep: 100
 https:
@@ -10,3 +14,4 @@ https:
 
 rabbitmqReconnectDelay: 10000
 delayBeforeDeletingInactiveQueue: 900000
+maxChannelPerConnection: 64000
